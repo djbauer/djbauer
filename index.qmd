@@ -1,9 +1,3 @@
----
-title: "neuron-consulting"
----
-
-Here is a draft website in Markdown format for your dissertation consulting business, Neuron Consulting:
-
 # Neuron Consulting
 
 ## About
