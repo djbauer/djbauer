@@ -14,5 +14,4 @@ format:
     theme: 
       light: sandstone
       dark: slate
-    css: styles.css
     toc: true

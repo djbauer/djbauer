@@ -6,13 +6,18 @@ Neuron Consulting was founded by Dr. David J. Bauer to provide specialized consu
 
 Dr. Bauer holds a PhD in Psychology from the University of Wisconsin-Milwaukee. With over 10 years of experience successfully guiding graduate students through the research process, he understands the unique challenges these students face.
 
-<div class="card text-white bg-success mb-3" style="max-width: 20rem;">
-  <div class="card-header">Accepting New Clients?</div>
-  <div class="card-body">
-    <h4 class="card-title">Yes!</h4>
-    <p class="card-text">I am accepting new clients.</p>
-  </div>
-</div>
+::: {.card .text-white .bg-success .mb-3 style="max-width: 20rem;"}
+::: card-header
+Accepting New Clients?
+:::
+
+::: card-body
+```         
+<h4 class="card-title">Yes!</h4>
+<p class="card-text">I am accepting new clients.</p>
+```
+:::
+:::
 
 Neuron Consulting draws upon Dr. Bauer's expertise in research design, statistical analysis, writing support, and project management to help students overcome hurdles and complete their thesis/dissertation efficiently and confidently.
 
@@ -55,11 +60,10 @@ Let me know if you would like me to expand or modify any part of this draft webs
 
 ## Domains
 
-- Nursing
-- Education
-- Counseling
-- Psychology
-- Sociology
-- Social Work
-- Human Services
-
+-   Nursing
+-   Education
+-   Counseling
+-   Psychology
+-   Sociology
+-   Social Work
+-   Human Services
