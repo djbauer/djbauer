@@ -1,0 +1,44 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "neuron-consulting",
+    "section": "",
+    "text": "Here is a draft website in Markdown format for your dissertation consulting business, Neuron Consulting:"
+  },
+  {
+    "objectID": "index.html#about",
+    "href": "index.html#about",
+    "title": "neuron-consulting",
+    "section": "About",
+    "text": "About\nNeuron Consulting was founded by Dr. David J. Bauer to provide specialized consulting services to graduate students working on their thesis or dissertation.\n::: {#alert .alert .alert-dismissible alert-warning} Dr. Bauer holds a PhD in Psychology from the University of Wisconsin-Milwaukee. With over 10 years of experience successfully guiding graduate students through the research process, he understands the unique challenges these students face. :::\n\nPrimary\n\n\nSecondary\n\n\nSuccess\n\n\nInfo\n\n\nWarning\n\n\nDanger\n\n\nLight\n\n\nDark\n\n\nLink\n\n\n\n\nWarning!\n\n\nBest check yo self, you’re not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.\n\n\nNeuron Consulting draws upon Dr. Bauer’s expertise in research design, statistical analysis, writing support, and project management to help students overcome hurdles and complete their thesis/dissertation efficiently and confidently.\n\nthis is a danger alert"
+  },
+  {
+    "objectID": "index.html#services",
+    "href": "index.html#services",
+    "title": "neuron-consulting",
+    "section": "Services",
+    "text": "Services\nNeuron Consulting provides customized support including:\n\nTopic selection and refinement\nLiterature reviews\nResearch design assistance\nIRB application support\nQuantitative and qualitative analysis\nStatistical consulting with SPSS, R, etc.\nWriting and editing services\nFinal proofreading and feedback\n\nDr. Bauer works closely with each client to provide tailored guidance based on their research topic, methodology, analysis approach, and goals."
+  },
+  {
+    "objectID": "index.html#contact",
+    "href": "index.html#contact",
+    "title": "neuron-consulting",
+    "section": "Contact",
+    "text": "Contact\nReady to get started on your thesis or dissertation? Reach out today to schedule your free 30-minute consultation.\nEmail: davidjbauer@neuronconsulting.com\nPhone: 507-494-8580\nAddress: 6080 State Hwy 16, Hokah, MN 55941"
+  },
+  {
+    "objectID": "index.html#service-area",
+    "href": "index.html#service-area",
+    "title": "neuron-consulting",
+    "section": "Service Area",
+    "text": "Service Area\nNeuron Consulting serves clients in:\n\nMinnesota\nWisconsin\nIowa\n\nWe provide virtual support, so location is not a constraint.\nLet me know if you would like me to expand or modify any part of this draft website content for your dissertation consulting business!"
+  },
+  {
+    "objectID": "index.html#domains",
+    "href": "index.html#domains",
+    "title": "neuron-consulting",
+    "section": "Domains",
+    "text": "Domains\n\nNursing\nEducation\nCounseling\nPsychology\nSociology\nSocial Work\nHuman Services"
+  }
+]
