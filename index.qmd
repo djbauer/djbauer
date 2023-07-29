@@ -1,36 +1,20 @@
 # Neuron Consulting
 
-TEST TEST TEST POOP
-
 ## About
 
 Neuron Consulting was founded by Dr. David J. Bauer to provide specialized consulting services to graduate students working on their thesis or dissertation.
 
-::: {#alert .alert .alert-dismissible alert-warning}
 Dr. Bauer holds a PhD in Psychology from the University of Wisconsin-Milwaukee. With over 10 years of experience successfully guiding graduate students through the research process, he understands the unique challenges these students face.
-:::
 
-<button type="button" class="btn btn-primary">Primary</button>
-<button type="button" class="btn btn-secondary">Secondary</button>
-<button type="button" class="btn btn-success">Success</button>
-<button type="button" class="btn btn-info">Info</button>
-<button type="button" class="btn btn-warning">Warning</button>
-<button type="button" class="btn btn-danger">Danger</button>
-<button type="button" class="btn btn-light">Light</button>
-<button type="button" class="btn btn-dark">Dark</button>
-<button type="button" class="btn btn-link">Link</button>
-
-<div class="alert alert-dismissible alert-warning">
-  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  <h4 class="alert-heading">Warning!</h4>
-  <p class="mb-0">Best check yo self, you're not looking too good. Nulla vitae elit libero, a pharetra augue. Praesent commodo cursus magna, <a href="#" class="alert-link">vel scelerisque nisl consectetur et</a>.</p>
+<div class="card text-white bg-success mb-3" style="max-width: 20rem;">
+  <div class="card-header">Accepting New Clients?</div>
+  <div class="card-body">
+    <h4 class="card-title">Yes!</h4>
+    <p class="card-text">I am accepting new clients.</p>
+  </div>
 </div>
 
 Neuron Consulting draws upon Dr. Bauer's expertise in research design, statistical analysis, writing support, and project management to help students overcome hurdles and complete their thesis/dissertation efficiently and confidently.
-
-::: danger
-this is a danger alert
-:::
 
 ## Services
 
