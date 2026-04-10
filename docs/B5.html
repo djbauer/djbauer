@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babylon 5 CCG Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1116;
+  --surface: #1a1d26;
+  --surface-alt: #232732;
+  --surface-hi: #2b3040;
+  --border: #3a4050;
+  --border-light: #2e3340;
+  --text: #f4f5f8;
+  --text-secondary: #b8bcc8;
+  --text-muted: #7a8196;
+  --accent: #ffb020;
+  --accent-light: #3b2f14;
+  --accent-hover: #ffc547;
+  --danger: #ef5350;
+  --danger-bg: #3a1e1e;
+  --success: #42d17e;
+  --success-bg: #1a3324;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg: 0 10px 28px rgba(0,0,0,.45);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 7px;
+  --transition: 150ms ease;
+}
+
+* { box-sizing: border-box; margin: 0; }
+body {
+  min-height: 100vh;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Topbar ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  background: rgba(15,17,22,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-light);
+}
+.topbar-brand { display: flex; align-items: center; gap: 12px; }
+.topbar-logo {
+  width: 38px; height: 38px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #1a1a1a;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -.02em;
+}
+.topbar-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -.01em;
+}
+.topbar-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topbar-round {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.topbar-round-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+.topbar-round-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--accent);
+  min-width: 20px;
+  text-align: center;
+}
+.topbar-round .btn-icon { width: 24px; height: 24px; font-size: 14px; }
+.topbar-actions { display: flex; gap: 6px; align-items: center; }
+.topbar-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 0 8px;
+}
+
+/* ── Buttons ── */
+button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  background: var(--surface-alt);
+  color: var(--text);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  line-height: 1.3;
+}
+button:hover { background: var(--surface-hi); border-color: #4a5065; }
+button:active { transform: scale(.98); }
+.btn-primary {
+  background: var(--accent);
+  color: #1a1a1a;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.btn-danger { color: var(--danger); }
+.btn-danger:hover { background: var(--danger-bg); border-color: #6a2e2e; }
+.btn-success { color: var(--success); }
+.btn-success:hover { background: var(--success-bg); }
+.btn-icon {
+  width: 30px; height: 30px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border-radius: var(--radius-xs);
+}
+.btn-icon.sm { width: 26px; height: 26px; font-size: 14px; }
+.btn-icon.lg { width: 40px; height: 40px; font-size: 22px; font-weight: 700; }
+.btn-counter-minus:hover { background: var(--danger-bg); border-color: #7a3535; color: var(--danger); }
+.btn-counter-plus:hover { background: var(--success-bg); border-color: #2f6842; color: var(--success); }
+
+/* ── Layout ── */
+.container { max-width: 1800px; margin: 0 auto; padding: 10px 14px; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ── Setup Screen ── */
+.setup-grid {
+  display: grid;
+  grid-template-columns: 1.1fr .9fr;
+  gap: 20px;
+  align-items: start;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.card-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+.card-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accent-light);
+  color: var(--accent);
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+/* ── Forms ── */
+.form-row { display: grid; gap: 12px; }
+.form-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.form-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+input, select, textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,176,32,.18);
+}
+textarea { resize: vertical; min-height: 80px; }
+
+.setup-player-card {
+  padding: 14px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  margin-top: 12px;
+}
+.setup-player-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.setup-player-num {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.setup-player-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.setup-player-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.setup-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+/* ── Rules Sidebar ── */
+.rules-card {
+  background: linear-gradient(135deg, #1f1a0f 0%, #1a1d26 100%);
+  border-color: #3b2f14;
+}
+.rules-item {
+  padding: 10px 12px;
+  background: rgba(255,176,32,.06);
+  border: 1px solid rgba(255,176,32,.18);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 8px;
+}
+.rules-item:first-of-type { margin-top: 0; }
+.rules-item strong { color: var(--text); font-weight: 600; }
+
+/* ── Dashboard Layout ── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 12px;
+}
+.dash-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dash-sidebar { display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Player Cards ── */
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--player-cols, 4), minmax(0, 1fr));
+  gap: 10px;
+}
+.player-card {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-left: 7px solid var(--player-accent, var(--accent));
+  border-radius: var(--radius);
+  padding: 10px 12px 10px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition);
+  /* Subtle tint with player color */
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--player-accent, var(--accent)) 14%, var(--surface)) 0%,
+      var(--surface) 55%
+    );
+}
+.player-card:hover { box-shadow: var(--shadow-md); }
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.player-avatar {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  background: var(--player-accent, var(--accent));
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.player-info { min-width: 0; flex: 1; }
+.player-name {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--player-accent, var(--text));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+}
+.player-faction {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stat layout: big Influence and Power side-by-side */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.stat-box {
+  padding: 8px 10px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+}
+.stat-box.prominent {
+  background: color-mix(in srgb, var(--player-accent, var(--accent)) 10%, var(--surface-alt));
+  border-color: color-mix(in srgb, var(--player-accent, var(--accent)) 35%, var(--border-light));
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.stat-box.prominent .stat-label {
+  color: color-mix(in srgb, var(--player-accent, var(--accent)) 85%, var(--text-secondary));
+}
+.stat-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.stat-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-box.prominent .stat-number {
+  font-size: 46px;
+  color: var(--player-accent, var(--accent));
+}
+.stat-box:not(.prominent) .stat-number { font-size: 22px; }
+/* Plus on top, minus on bottom — reversed from natural DOM order */
+.stat-controls { display: flex; flex-direction: column-reverse; gap: 3px; }
+
+/* Temp influence sub-row inside the Influence box */
+.temp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed color-mix(in srgb, var(--player-accent, var(--accent)) 30%, var(--border-light));
+  gap: 6px;
+}
+.temp-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+.temp-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.temp-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  min-width: 16px;
+  text-align: center;
+}
+
+/* ── Sidebar Panels ── */
+.sidebar-card {
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+
+/* ── Shared Counters ── */
+.shared-grid { display: grid; gap: 6px; }
+.shared-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+}
+.shared-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.shared-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.shared-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  min-width: 28px;
+  text-align: center;
+  color: var(--accent);
+}
+
+/* ── Tension / Unrest Matrix ── */
+.matrix-wrap { overflow-x: auto; }
+.matrix-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 3px;
+  font-size: 13px;
+}
+.matrix-table th {
+  padding: 4px 6px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  background: transparent;
+}
+.matrix-table th.unrest-head {
+  color: var(--accent);
+  font-size: 11px;
+}
+.matrix-table th.player-head {
+  font-size: 14px;
+  letter-spacing: .02em;
+}
+.matrix-table td {
+  padding: 3px;
+  text-align: center;
+  background: var(--surface-alt);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-light);
+  min-width: 58px;
+}
+.matrix-table td.self {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+.matrix-row-label {
+  background: transparent !important;
+  border: none !important;
+  border-left: 5px solid var(--row-color, var(--accent)) !important;
+  padding: 4px 10px 4px 8px !important;
+  text-align: left !important;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--row-color, var(--text));
+  white-space: nowrap;
+}
+.matrix-cell-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+.matrix-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  min-width: 20px;
+  color: var(--text);
+}
+.matrix-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Unrest column gets distinct styling */
+.unrest-cell {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface-alt)) !important;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-light)) !important;
+}
+.unrest-num {
+  color: var(--accent) !important;
+  font-size: 22px !important;
+}
+
+/* ── Notes ── */
+.notes-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.notes-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,176,32,.18);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .dash-sidebar { flex-direction: row; flex-wrap: wrap; }
+  .dash-sidebar > * { flex: 1; min-width: 280px; }
+}
+@media (max-width: 900px) {
+  .setup-grid { grid-template-columns: 1fr; }
+  .player-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+  .topbar { padding: 8px 12px; }
+  .form-row.cols-3, .form-row.cols-2 { grid-template-columns: 1fr; }
+  .player-grid { grid-template-columns: 1fr !important; }
+  .stat-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">B5</div>
+    <div>
+      <div class="topbar-title">Babylon 5 CCG</div>
+      <div class="topbar-subtitle">Game Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-center" id="topbarCenter"></div>
+  <div class="topbar-actions" id="topbarActions"></div>
+</header>
+
+<div class="container">
+
+  <!-- ── Setup Screen ── -->
+  <section class="screen active" id="setupScreen">
+    <div class="setup-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Game Setup</div>
+          <div class="card-badge">Configure</div>
+        </div>
+        <div class="form-row cols-2">
+          <div>
+            <label class="form-label" for="playerCount">Players</label>
+            <select id="playerCount"></select>
+          </div>
+          <div>
+            <label class="form-label" for="tableLabel">Table Label</label>
+            <input id="tableLabel" type="text" placeholder="e.g. League Night">
+          </div>
+        </div>
+        <div id="setupPlayerList"></div>
+        <div class="setup-actions">
+          <button class="btn-primary" id="startGameButton">Start Game</button>
+          <button id="loadExampleButton">Load Example</button>
+          <button id="resumeGameButton">Resume Saved</button>
+        </div>
+      </div>
+      <div class="card rules-card">
+        <div class="card-header">
+          <div class="card-title">Rules Baseline</div>
+          <div class="card-badge">Reference</div>
+        </div>
+        <div class="rules-item">Uses the local <strong>rules-rulings.pdf</strong> as the setup baseline for starting values and tension defaults.</div>
+        <div class="rules-item"><strong>Starting unrest:</strong> 1 for Centauri, Earth Alliance, Minbari, and Narn. 2 for Non-Aligned Worlds.</div>
+        <div class="rules-item"><strong>Starting tensions</strong> are auto-generated by race pairing. Same-race players start at tension 2 toward each other.</div>
+        <div class="rules-item">Use the <strong>Custom Label</strong> field during setup if your table uses a more specific faction name than the presets.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Dashboard Screen ── -->
+  <section class="screen" id="dashboardScreen">
+    <div class="dashboard-grid">
+      <!-- Main Area -->
+      <section class="dash-main">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Players</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;" id="tableSummary"></div>
+            </div>
+            <div class="card-badge" id="playerCountBadge"></div>
+          </div>
+          <div class="player-grid" id="playerGrid"></div>
+        </div>
+
+        <!-- Tension / Unrest Matrix -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Unrest &amp; Tensions</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Row player's unrest and their tension toward each column player</div>
+            </div>
+          </div>
+          <div class="matrix-wrap">
+            <table class="matrix-table" id="tensionMatrix"></table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar -->
+      <aside class="dash-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-title">Shared Pools</div>
+          <div class="shared-grid" id="sharedGrid"></div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-title">Session Notes</div>
+          <textarea class="notes-textarea" id="notesArea" placeholder="Jot down anything worth remembering..."></textarea>
+        </div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   BABYLON 5 CCG DASHBOARD — STATE & DATA
+   ══════════════════════════════════════════════════════ */
+const STORAGE_KEY = "b5ccg-dashboard-state-v6";
+/* Vivid, high-contrast palette selected to read well from 8–10 ft. */
+const PLAYER_COLORS = ["#3b82f6", "#f97316", "#22c55e", "#ec4899", "#a855f7", "#eab308"];
+const RACES = ["Centauri Republic", "Earth Alliance", "Minbari Federation", "Narn Regime", "Non-Aligned Worlds"];
+const FACTIONS_BY_RACE = {
+  "Centauri Republic": ["Regular Faction", "Home Faction"],
+  "Earth Alliance":    ["Regular Faction", "Home Faction", "Psi Corps"],
+  "Minbari Federation":["Regular Faction", "Home Faction"],
+  "Narn Regime":       ["Regular Faction", "Home Faction"],
+  "Non-Aligned Worlds":["Bullshit Faction"]
+};
+/* Case-insensitive set of names that should be swapped out for a random
+   absurd insult drawn from SUBSTITUTION_POOL when the dashboard is built.
+   The setup screen still shows the real name; only the dashboard hides it. */
+const NAMES_TO_SUBSTITUTE = new Set(["ryan", "nate"]);
+const SUBSTITUTION_POOL = [
+  "Cunthole", "Shitgibbon", "Douchecanoe", "Fuckwit", "Twatwaffle",
+  "Asshat", "Fucknugget", "Knobgoblin", "Dickweed", "Wankstain",
+  "Fartknocker", "Crapweasel", "Shitburger", "Taintlicker", "Fuckstick",
+  "Numbnuts", "Cockwomble", "Arsebadger", "Crotchgoblin", "Pissflaps",
+  "Shitbiscuit", "Cuntmuffin", "Jizzlobber", "Buttwaffle", "Fucktrumpet",
+  "Scrotumface", "Bumgravy", "Dingleberry", "Spunktrumpet", "Twatburger"
+];
+const STARTING_UNREST = {
+  "Centauri Republic": 1, "Earth Alliance": 1, "Minbari Federation": 1,
+  "Narn Regime": 1, "Non-Aligned Worlds": 2
+};
+const BASE_TENSION = {
+  "Centauri Republic":   {"Centauri Republic":2,"Earth Alliance":2,"Minbari Federation":2,"Narn Regime":4,"Non-Aligned Worlds":2},
+  "Earth Alliance":      {"Centauri Republic":2,"Earth Alliance":2,"Minbari Federation":1,"Narn Regime":2,"Non-Aligned Worlds":1},
+  "Minbari Federation":  {"Centauri Republic":2,"Earth Alliance":1,"Minbari Federation":2,"Narn Regime":1,"Non-Aligned Worlds":1},
+  "Narn Regime":         {"Centauri Republic":4,"Earth Alliance":2,"Minbari Federation":1,"Narn Regime":2,"Non-Aligned Worlds":1},
+  "Non-Aligned Worlds":  {"Centauri Republic":2,"Earth Alliance":1,"Minbari Federation":1,"Narn Regime":1,"Non-Aligned Worlds":2}
+};
+const PLAYER_STAT_DEFAULTS = {
+  influence: 4,
+  power: 4,
+  unrest: 1,
+  temporaryInfluence: 0
+};
+const SHARED_COUNTERS = {
+  babylon5Influence: {label:"Babylon 5", initial:4},
+  shadowInfluence:   {label:"Shadows",   initial:4},
+  vorlonInfluence:   {label:"Vorlons",   initial:4}
+};
+
+const defaultState = {
+  currentScreen:"setup", tableLabel:"", round:1,
+  setup:{playerCount:3, players:[]},
+  players:[], tensions:[], shared:{}, notes:""
+};
+
+function clone(v){ return JSON.parse(JSON.stringify(v)); }
+
+function defaultSetupPlayer(i){
+  const race = RACES[Math.min(i, RACES.length-1)];
+  return {name:"Player "+(i+1), race, faction:FACTIONS_BY_RACE[race][0], factionLabel:""};
+}
+function sharedDefaults(){
+  const s = {};
+  Object.entries(SHARED_COUNTERS).forEach(([k,c])=>{ s[k]=c.initial; });
+  return s;
+}
+function normalizeSetupPlayers(st, count){
+  while(st.setup.players.length < count) st.setup.players.push(defaultSetupPlayer(st.setup.players.length));
+  st.setup.players = st.setup.players.slice(0, count);
+}
+
+/* ── Load / Save ── */
+function loadState(){
+  const base = clone(defaultState);
+  base.setup.players = [defaultSetupPlayer(0), defaultSetupPlayer(1), defaultSetupPlayer(2)];
+  base.shared = sharedDefaults();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw) return base;
+  try {
+    const p = JSON.parse(raw);
+    const m = Object.assign({}, base, p);
+    m.setup  = Object.assign({}, base.setup, p.setup||{});
+    m.shared = Object.assign({}, base.shared, p.shared||{});
+    m.setup.players = Array.isArray(p.setup?.players) ? p.setup.players : base.setup.players;
+    normalizeSetupPlayers(m, m.setup.playerCount||3);
+    return m;
+  } catch { return base; }
+}
+let state = loadState();
+
+function saveState(msg){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const el = document.getElementById("saveStatus");
+  if(el) el.textContent = msg||"Saved";
+}
+
+/* ── Helpers ── */
+function factionOptions(race){ return FACTIONS_BY_RACE[race]||["Home Faction","Babylon Project","Corporate"]; }
+function playerColor(i){ return PLAYER_COLORS[i % PLAYER_COLORS.length]; }
+/* Build a one-off substitution map for this game: each targeted name gets a
+   distinct random pick from the pool so two triggers in the same game don't
+   collide. Re-run on every buildDashboard() so every new game is a surprise. */
+function makeNameSubstitutionMap(setupPlayers){
+  const pool = SUBSTITUTION_POOL.slice();
+  // Fisher–Yates shuffle
+  for(let i = pool.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const map = {};
+  let idx = 0;
+  setupPlayers.forEach(sp => {
+    const key = String(sp.name || "").trim().toLowerCase();
+    if(NAMES_TO_SUBSTITUTE.has(key) && !(key in map)){
+      map[key] = pool[idx % pool.length];
+      idx++;
+    }
+  });
+  return map;
+}
+function buildPlayer(sp, i, subMap){
+  const stats = {
+    influence: PLAYER_STAT_DEFAULTS.influence,
+    power: PLAYER_STAT_DEFAULTS.power,
+    unrest: STARTING_UNREST[sp.race] ?? PLAYER_STAT_DEFAULTS.unrest,
+    temporaryInfluence: PLAYER_STAT_DEFAULTS.temporaryInfluence
+  };
+  const key = String(sp.name || "").trim().toLowerCase();
+  const displayName = (subMap && subMap[key]) || sp.name || ("Player "+(i+1));
+  return {id:i+1, color:playerColor(i), name:displayName, race:sp.race, faction:sp.faction, factionLabel:sp.factionLabel||"", stats};
+}
+function generateTensions(players){
+  return players.map((src,s)=>players.map((tgt,t)=>{
+    if(s===t) return null;
+    return BASE_TENSION[src.race]?.[tgt.race] ?? 0;
+  }));
+}
+function firstName(p){ return (p.name||"").split(" ")[0] || p.name || ""; }
+
+/* ══════════════════════════════════════════════════════
+   SCREEN MANAGEMENT
+   ══════════════════════════════════════════════════════ */
+function setScreen(screen){
+  state.currentScreen = screen;
+  document.getElementById("setupScreen").classList.toggle("active", screen==="setup");
+  document.getElementById("dashboardScreen").classList.toggle("active", screen==="dashboard");
+  renderTopbarActions(screen);
+  renderTopbarCenter(screen);
+}
+function renderTopbarCenter(screen){
+  const c = document.getElementById("topbarCenter");
+  c.innerHTML = "";
+  if(screen !== "dashboard") return;
+  const pill = document.createElement("div");
+  pill.className = "topbar-round";
+
+  const lab = document.createElement("span");
+  lab.className = "topbar-round-label";
+  lab.textContent = "Round";
+
+  const val = document.createElement("span");
+  val.className = "topbar-round-value";
+  val.id = "roundValue";
+  val.textContent = String(state.round);
+
+  const minus = document.createElement("button");
+  minus.className = "btn-icon btn-counter-minus";
+  minus.textContent = "\u2212";
+  minus.addEventListener("click", ()=>{
+    state.round = Math.max(1, state.round - 1);
+    val.textContent = String(state.round);
+    saveState("Round updated.");
+  });
+
+  const plus = document.createElement("button");
+  plus.className = "btn-icon btn-counter-plus";
+  plus.textContent = "+";
+  plus.addEventListener("click", ()=>{
+    state.round = state.round + 1;
+    val.textContent = String(state.round);
+    saveState("Round updated.");
+  });
+
+  pill.appendChild(lab);
+  pill.appendChild(val);
+  pill.appendChild(minus);
+  pill.appendChild(plus);
+  c.appendChild(pill);
+}
+function renderTopbarActions(screen){
+  const bar = document.getElementById("topbarActions");
+  bar.innerHTML = "";
+  if(screen === "dashboard"){
+    const status = document.createElement("span");
+    status.className = "topbar-status";
+    status.id = "saveStatus";
+    status.textContent = "Ready";
+    bar.appendChild(status);
+    [
+      {label:"Edit Setup", cls:"", fn:()=>{ setScreen("setup"); renderSetup(); saveState("Returned to setup."); }},
+      {label:"Export", cls:"", fn: doExport},
+      {label:"Import", cls:"", fn: doImport},
+      {label:"New Game", cls:"btn-danger", fn:()=>{
+        if(!confirm("Clear the current board and return to setup?")) return;
+        localStorage.removeItem(STORAGE_KEY);
+        state = loadState();
+        renderApp();
+        saveState("New game started.");
+      }}
+    ].forEach(({label, cls, fn})=>{
+      const btn = document.createElement("button");
+      btn.textContent = label;
+      if(cls) btn.className = cls;
+      btn.addEventListener("click", fn);
+      bar.appendChild(btn);
+    });
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   SETUP RENDERING
+   ══════════════════════════════════════════════════════ */
+function renderSetup(){
+  const cs = document.getElementById("playerCount");
+  if(!cs.childElementCount){
+    for(let i=2;i<=6;i++){
+      const o = document.createElement("option");
+      o.value = String(i); o.textContent = String(i);
+      cs.appendChild(o);
+    }
+  }
+  cs.value = String(state.setup.playerCount);
+  document.getElementById("tableLabel").value = state.tableLabel||"";
+
+  const list = document.getElementById("setupPlayerList");
+  list.innerHTML = "";
+  normalizeSetupPlayers(state, state.setup.playerCount);
+
+  state.setup.players.forEach((player, i)=>{
+    const card = document.createElement("div");
+    card.className = "setup-player-card";
+
+    const header = document.createElement("div");
+    header.className = "setup-player-header";
+    const num = document.createElement("div");
+    num.className = "setup-player-num";
+    num.style.background = playerColor(i);
+    num.textContent = String(i+1);
+    const lbl = document.createElement("div");
+    lbl.className = "setup-player-label";
+    lbl.textContent = "Player " + (i+1);
+    header.appendChild(num);
+    header.appendChild(lbl);
+    card.appendChild(header);
+
+    const grid = document.createElement("div");
+    grid.className = "form-row cols-2";
+
+    // Name
+    const nameDiv = document.createElement("div");
+    const nameL = document.createElement("label"); nameL.className="form-label"; nameL.textContent="Name";
+    const nameI = document.createElement("input"); nameI.type="text"; nameI.value=player.name;
+    nameI.addEventListener("input", e=>{ state.setup.players[i].name=e.target.value; saveState("Setup updated."); });
+    nameDiv.appendChild(nameL); nameDiv.appendChild(nameI);
+
+    // Race
+    const raceDiv = document.createElement("div");
+    const raceL = document.createElement("label"); raceL.className="form-label"; raceL.textContent="Race";
+    const raceSel = document.createElement("select");
+    RACES.forEach(r=>{
+      const o = document.createElement("option");
+      o.value=r; o.textContent=r; o.selected = r===player.race;
+      raceSel.appendChild(o);
+    });
+    raceSel.addEventListener("change", e=>{
+      state.setup.players[i].race = e.target.value;
+      state.setup.players[i].faction = factionOptions(e.target.value)[0];
+      renderSetup(); saveState("Setup updated.");
+    });
+    raceDiv.appendChild(raceL); raceDiv.appendChild(raceSel);
+
+    // Faction
+    const facDiv = document.createElement("div");
+    const facL = document.createElement("label"); facL.className="form-label"; facL.textContent="Faction Type";
+    const facSel = document.createElement("select");
+    factionOptions(player.race).forEach(f=>{
+      const o = document.createElement("option");
+      o.value=f; o.textContent=f; o.selected = f===player.faction;
+      facSel.appendChild(o);
+    });
+    facSel.addEventListener("change", e=>{ state.setup.players[i].faction=e.target.value; saveState("Setup updated."); });
+    facDiv.appendChild(facL); facDiv.appendChild(facSel);
+
+    // Custom Label
+    const custDiv = document.createElement("div");
+    const custL = document.createElement("label"); custL.className="form-label"; custL.textContent="Custom Label";
+    const custI = document.createElement("input"); custI.type="text"; custI.value=player.factionLabel||""; custI.placeholder="Optional specific name";
+    custI.addEventListener("input", e=>{ state.setup.players[i].factionLabel=e.target.value; saveState("Setup updated."); });
+    custDiv.appendChild(custL); custDiv.appendChild(custI);
+
+    grid.appendChild(nameDiv); grid.appendChild(raceDiv);
+    grid.appendChild(facDiv); grid.appendChild(custDiv);
+    card.appendChild(grid);
+
+    const hint = document.createElement("div");
+    hint.className = "setup-player-hint";
+    hint.textContent = "Starts at unrest " + (STARTING_UNREST[player.race]??1);
+    card.appendChild(hint);
+    list.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   DASHBOARD RENDERING
+   ══════════════════════════════════════════════════════ */
+function updateStat(pi, key, delta, nonNegative){
+  const cur = state.players[pi].stats[key] + delta;
+  state.players[pi].stats[key] = nonNegative ? Math.max(0, cur) : cur;
+  return state.players[pi].stats[key];
+}
+
+/* Decide how many columns to use for the player grid based on player count.
+   Goal: keep everything on one screen for typical 2–4 player games. */
+function playerColumnsFor(n){
+  if(n <= 1) return 1;
+  if(n === 2) return 2;
+  if(n === 3) return 3;
+  if(n === 4) return 4;
+  return 3; // 5–6 players: 3 cols × 2 rows
+}
+
+function renderPlayerGrid(){
+  const root = document.getElementById("playerGrid");
+  root.innerHTML = "";
+  root.style.setProperty("--player-cols", String(playerColumnsFor(state.players.length)));
+  state.players.forEach((player, i)=>{
+    const card = document.createElement("article");
+    card.className = "player-card";
+    const color = player.color || playerColor(i);
+    card.style.setProperty("--player-accent", color);
+
+    // Header
+    const hdr = document.createElement("div");
+    hdr.className = "player-header";
+    const avatar = document.createElement("div");
+    avatar.className = "player-avatar";
+    avatar.textContent = String(player.id);
+    const info = document.createElement("div");
+    info.className = "player-info";
+    const nm = document.createElement("div");
+    nm.className = "player-name";
+    nm.textContent = player.name;
+    const fac = document.createElement("div");
+    fac.className = "player-faction";
+    fac.textContent = player.race + " \u2022 " + (player.factionLabel||player.faction);
+    info.appendChild(nm); info.appendChild(fac);
+    hdr.appendChild(avatar); hdr.appendChild(info);
+
+    // Stats grid: Influence (with Temp sub-row) + Power
+    const grid = document.createElement("div");
+    grid.className = "stat-grid";
+
+    // ─ Power number created first so Influence handlers can update it too ─
+    const pwrNum = document.createElement("div");
+    pwrNum.className = "stat-number";
+    pwrNum.textContent = String(player.stats.power);
+
+    // ─ Influence box ─
+    const infBox = document.createElement("div");
+    infBox.className = "stat-box prominent";
+
+    const infLabel = document.createElement("div");
+    infLabel.className = "stat-label";
+    infLabel.textContent = "Influence";
+
+    const infRow = document.createElement("div");
+    infRow.className = "stat-value";
+    const infNum = document.createElement("div");
+    infNum.className = "stat-number";
+    infNum.textContent = String(player.stats.influence);
+    const infCtrls = document.createElement("div");
+    infCtrls.className = "stat-controls";
+    const infMinus = document.createElement("button");
+    infMinus.className = "btn-icon btn-counter-minus";
+    infMinus.textContent = "\u2212";
+    infMinus.addEventListener("click", ()=>{
+      // Influence counts as Power — moving Influence moves Power by the same amount.
+      infNum.textContent = String(updateStat(i,"influence",-1,false));
+      pwrNum.textContent = String(updateStat(i,"power",-1,false));
+      saveState(player.name+" Influence changed.");
+    });
+    const infPlus = document.createElement("button");
+    infPlus.className = "btn-icon btn-counter-plus";
+    infPlus.textContent = "+";
+    infPlus.addEventListener("click", ()=>{
+      infNum.textContent = String(updateStat(i,"influence",1,false));
+      pwrNum.textContent = String(updateStat(i,"power",1,false));
+      saveState(player.name+" Influence changed.");
+    });
+    infCtrls.appendChild(infMinus); infCtrls.appendChild(infPlus);
+    infRow.appendChild(infNum); infRow.appendChild(infCtrls);
+
+    // Temp influence sub-row
+    const tempRow = document.createElement("div");
+    tempRow.className = "temp-row";
+    const tempLabel = document.createElement("div");
+    tempLabel.className = "temp-label";
+    tempLabel.textContent = "Temp";
+    const tempVal = document.createElement("div");
+    tempVal.className = "temp-value";
+    const tempMinus = document.createElement("button");
+    tempMinus.className = "btn-icon sm btn-counter-minus";
+    tempMinus.textContent = "\u2212";
+    const tempNum = document.createElement("span");
+    tempNum.className = "temp-number";
+    tempNum.textContent = String(player.stats.temporaryInfluence);
+    const tempPlus = document.createElement("button");
+    tempPlus.className = "btn-icon sm btn-counter-plus";
+    tempPlus.textContent = "+";
+    tempMinus.addEventListener("click", ()=>{
+      tempNum.textContent = String(updateStat(i,"temporaryInfluence",-1,true));
+      saveState(player.name+" Temp Influence changed.");
+    });
+    tempPlus.addEventListener("click", ()=>{
+      tempNum.textContent = String(updateStat(i,"temporaryInfluence",1,true));
+      saveState(player.name+" Temp Influence changed.");
+    });
+    tempVal.appendChild(tempMinus); tempVal.appendChild(tempNum); tempVal.appendChild(tempPlus);
+    tempRow.appendChild(tempLabel); tempRow.appendChild(tempVal);
+
+    infBox.appendChild(infLabel);
+    infBox.appendChild(infRow);
+    infBox.appendChild(tempRow);
+
+    // ─ Power box (pwrNum was created earlier so Influence handlers could update it) ─
+    const pwrBox = document.createElement("div");
+    pwrBox.className = "stat-box prominent";
+    const pwrLabel = document.createElement("div");
+    pwrLabel.className = "stat-label";
+    pwrLabel.textContent = "Power";
+    const pwrRow = document.createElement("div");
+    pwrRow.className = "stat-value";
+    const pwrCtrls = document.createElement("div");
+    pwrCtrls.className = "stat-controls";
+    const pwrMinus = document.createElement("button");
+    pwrMinus.className = "btn-icon btn-counter-minus";
+    pwrMinus.textContent = "\u2212";
+    pwrMinus.addEventListener("click", ()=>{
+      pwrNum.textContent = String(updateStat(i,"power",-1,false));
+      saveState(player.name+" Power changed.");
+    });
+    const pwrPlus = document.createElement("button");
+    pwrPlus.className = "btn-icon btn-counter-plus";
+    pwrPlus.textContent = "+";
+    pwrPlus.addEventListener("click", ()=>{
+      pwrNum.textContent = String(updateStat(i,"power",1,false));
+      saveState(player.name+" Power changed.");
+    });
+    pwrCtrls.appendChild(pwrMinus); pwrCtrls.appendChild(pwrPlus);
+    pwrRow.appendChild(pwrNum); pwrRow.appendChild(pwrCtrls);
+    pwrBox.appendChild(pwrLabel); pwrBox.appendChild(pwrRow);
+
+    grid.appendChild(infBox);
+    grid.appendChild(pwrBox);
+
+    card.appendChild(hdr);
+    card.appendChild(grid);
+    root.appendChild(card);
+  });
+}
+
+function renderTensions(){
+  const root = document.getElementById("tensionMatrix");
+  root.innerHTML = "";
+  const players = state.players;
+  if(!players.length) return;
+
+  // Header row: [blank] [UNREST] [Player1] [Player2] ...
+  const thead = document.createElement("thead");
+  const headRow = document.createElement("tr");
+  const corner = document.createElement("th");
+  corner.textContent = "";
+  headRow.appendChild(corner);
+
+  const unrestTh = document.createElement("th");
+  unrestTh.className = "unrest-head";
+  unrestTh.textContent = "Unrest";
+  headRow.appendChild(unrestTh);
+
+  players.forEach((p,i)=>{
+    const th = document.createElement("th");
+    th.className = "player-head";
+    th.textContent = firstName(p);
+    th.style.color = p.color||playerColor(i);
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  root.appendChild(thead);
+
+  // Body
+  const tbody = document.createElement("tbody");
+  players.forEach((src, s)=>{
+    const tr = document.createElement("tr");
+    const color = src.color||playerColor(s);
+
+    // Row label
+    const label = document.createElement("td");
+    label.className = "matrix-row-label";
+    label.style.setProperty("--row-color", color);
+    label.textContent = firstName(src);
+    tr.appendChild(label);
+
+    // Unrest cell (belongs to row player)
+    const unrestTd = document.createElement("td");
+    unrestTd.className = "unrest-cell";
+    const uInner = document.createElement("div");
+    uInner.className = "matrix-cell-inner";
+    const uMinus = document.createElement("button");
+    uMinus.className = "matrix-btn btn-counter-minus";
+    uMinus.textContent = "\u2212";
+    uMinus.addEventListener("click", ()=>{
+      state.players[s].stats.unrest = Math.max(0, state.players[s].stats.unrest - 1);
+      renderTensions();
+      saveState(src.name+" Unrest changed.");
+    });
+    const uNum = document.createElement("span");
+    uNum.className = "matrix-num unrest-num";
+    uNum.textContent = String(state.players[s].stats.unrest);
+    const uPlus = document.createElement("button");
+    uPlus.className = "matrix-btn btn-counter-plus";
+    uPlus.textContent = "+";
+    uPlus.addEventListener("click", ()=>{
+      state.players[s].stats.unrest += 1;
+      renderTensions();
+      saveState(src.name+" Unrest changed.");
+    });
+    uInner.appendChild(uMinus); uInner.appendChild(uNum); uInner.appendChild(uPlus);
+    unrestTd.appendChild(uInner);
+    tr.appendChild(unrestTd);
+
+    // Tension cells
+    players.forEach((tgt, t)=>{
+      const td = document.createElement("td");
+      if(s===t){
+        td.className = "self";
+        td.textContent = "\u2014";
+      } else {
+        const inner = document.createElement("div");
+        inner.className = "matrix-cell-inner";
+        const minus = document.createElement("button");
+        minus.className = "matrix-btn btn-counter-minus";
+        minus.textContent = "\u2212";
+        minus.addEventListener("click", ()=>{
+          state.tensions[s][t] -= 1;
+          renderTensions();
+          saveState("Tension updated.");
+        });
+        const num = document.createElement("span");
+        num.className = "matrix-num";
+        num.style.color = color;
+        num.textContent = String(state.tensions[s][t]);
+        const plus = document.createElement("button");
+        plus.className = "matrix-btn btn-counter-plus";
+        plus.textContent = "+";
+        plus.addEventListener("click", ()=>{
+          state.tensions[s][t] += 1;
+          renderTensions();
+          saveState("Tension updated.");
+        });
+        inner.appendChild(minus); inner.appendChild(num); inner.appendChild(plus);
+        td.appendChild(inner);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  root.appendChild(tbody);
+}
+
+function renderShared(){
+  const root = document.getElementById("sharedGrid");
+  root.innerHTML = "";
+  Object.entries(SHARED_COUNTERS).forEach(([key, cfg])=>{
+    const row = document.createElement("div");
+    row.className = "shared-counter";
+    const label = document.createElement("div");
+    label.className = "shared-label";
+    label.textContent = cfg.label;
+    const right = document.createElement("div");
+    right.className = "shared-right";
+
+    const minus = document.createElement("button");
+    minus.className = "btn-icon btn-counter-minus";
+    minus.textContent = "\u2212";
+    const num = document.createElement("span");
+    num.className = "shared-number";
+    num.textContent = String(state.shared[key]);
+    const plus = document.createElement("button");
+    plus.className = "btn-icon btn-counter-plus";
+    plus.textContent = "+";
+
+    minus.addEventListener("click", ()=>{
+      state.shared[key] -= 1;
+      num.textContent = String(state.shared[key]);
+      saveState(cfg.label+" changed.");
+    });
+    plus.addEventListener("click", ()=>{
+      state.shared[key] += 1;
+      num.textContent = String(state.shared[key]);
+      saveState(cfg.label+" changed.");
+    });
+
+    right.appendChild(minus); right.appendChild(num); right.appendChild(plus);
+    row.appendChild(label); row.appendChild(right);
+    root.appendChild(row);
+  });
+}
+
+function renderDashboardMeta(){
+  document.getElementById("playerCountBadge").textContent = state.players.length + " players";
+  document.getElementById("tableSummary").textContent = (state.tableLabel ? state.tableLabel + " \u2022 " : "") + "Rules baseline: rules-rulings.pdf";
+}
+
+function renderNotes(){
+  const el = document.getElementById("notesArea");
+  el.value = state.notes||"";
+}
+
+function renderDashboard(){
+  renderDashboardMeta();
+  renderPlayerGrid();
+  renderTensions();
+  renderShared();
+  renderNotes();
+}
+
+function renderApp(){
+  renderSetup();
+  renderDashboard();
+  setScreen(state.currentScreen||"setup");
+}
+
+/* ══════════════════════════════════════════════════════
+   ACTIONS
+   ══════════════════════════════════════════════════════ */
+function buildDashboard(){
+  state.round = 1;
+  state.tableLabel = document.getElementById("tableLabel").value.trim();
+  const srcPlayers = state.setup.players.slice(0, state.setup.playerCount);
+  const subMap = makeNameSubstitutionMap(srcPlayers);
+  state.players = srcPlayers.map((sp, i) => buildPlayer(sp, i, subMap));
+  state.tensions = generateTensions(state.players);
+  state.shared = sharedDefaults();
+  state.notes = "";
+  setScreen("dashboard");
+  renderDashboard();
+  saveState("Dashboard built from setup.");
+}
+
+function loadExample(){
+  state.setup.playerCount = 4;
+  state.setup.players = [
+    {name:"Alice", race:"Earth Alliance", faction:"Babylon Project", factionLabel:""},
+    {name:"Ben", race:"Centauri Republic", faction:"Home Faction", factionLabel:"Royal Court"},
+    {name:"Cara", race:"Narn Regime", faction:"Home Faction", factionLabel:"Kha'Ri"},
+    {name:"Drew", race:"Minbari Federation", faction:"Babylon Project", factionLabel:"Religious Caste"}
+  ];
+  state.round = 1;
+  state.tableLabel = "Example Table";
+  renderSetup();
+  saveState("Example setup loaded.");
+}
+
+async function doExport(){
+  const payload = JSON.stringify(state, null, 2);
+  if(navigator.clipboard?.writeText){
+    await navigator.clipboard.writeText(payload);
+    saveState("Save copied to clipboard.");
+    return;
+  }
+  window.prompt("Copy your save data:", payload);
+}
+
+function doImport(){
+  const raw = window.prompt("Paste previously exported save data:");
+  if(!raw) return;
+  try {
+    const p = JSON.parse(raw);
+    const inc = Object.assign({}, clone(defaultState), p);
+    inc.setup  = Object.assign({}, clone(defaultState).setup, p.setup||{});
+    inc.shared = Object.assign({}, sharedDefaults(), p.shared||{});
+    inc.setup.players = Array.isArray(p.setup?.players) ? p.setup.players : [defaultSetupPlayer(0), defaultSetupPlayer(1), defaultSetupPlayer(2)];
+    normalizeSetupPlayers(inc, inc.setup.playerCount||3);
+    state = inc;
+    state.players = (state.players||[]).map((pl,i)=>Object.assign({color:playerColor(i)}, pl, {color:playerColor(i)}));
+    renderApp();
+    saveState("Save imported.");
+  } catch { saveState("Import failed. Invalid save data."); }
+}
+
+/* ══════════════════════════════════════════════════════
+   EVENT LISTENERS
+   ══════════════════════════════════════════════════════ */
+document.getElementById("playerCount").addEventListener("change", e=>{
+  state.setup.playerCount = Number(e.target.value);
+  normalizeSetupPlayers(state, state.setup.playerCount);
+  renderSetup();
+  saveState("Player count updated.");
+});
+document.getElementById("tableLabel").addEventListener("input", e=>{
+  state.tableLabel = e.target.value;
+  saveState("Setup updated.");
+});
+document.getElementById("startGameButton").addEventListener("click", buildDashboard);
+document.getElementById("loadExampleButton").addEventListener("click", loadExample);
+document.getElementById("resumeGameButton").addEventListener("click", ()=>{
+  if(!state.players.length){ saveState("No saved dashboard available."); return; }
+  setScreen("dashboard");
+  renderDashboard();
+  saveState("Saved dashboard resumed.");
+});
+
+// Notes auto-save
+document.getElementById("notesArea").addEventListener("input", e=>{
+  state.notes = e.target.value;
+  saveState("Notes saved.");
+});
+
+/* ── Bootstrap ── */
+renderApp();
+saveState("Ready.");
+</script>
+</body>
+</html>
