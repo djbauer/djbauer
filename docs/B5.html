@@ -725,28 +725,18 @@ const FACTIONS_BY_RACE = {
   "Narn Regime":       ["Regular Faction", "Home Faction"],
   "Non-Aligned Worlds":["Bullshit Faction"]
 };
-/* Case-insensitive set of names that should be swapped out for a random
-   absurd insult drawn from SUBSTITUTION_POOL when the dashboard is built.
-   The setup screen still shows the real name; only the dashboard hides it. */
-const NAMES_TO_SUBSTITUTE = new Set(["ryan", "nate"]);
-const SUBSTITUTION_POOL = [
-  "Cunthole", "Shitgibbon", "Douchecanoe", "Fuckwit", "Twatwaffle",
-  "Asshat", "Fucknugget", "Knobgoblin", "Dickweed", "Wankstain",
-  "Fartknocker", "Crapweasel", "Shitburger", "Taintlicker", "Fuckstick",
-  "Numbnuts", "Cockwomble", "Arsebadger", "Crotchgoblin", "Pissflaps",
-  "Shitbiscuit", "Cuntmuffin", "Jizzlobber", "Buttwaffle", "Fucktrumpet",
-  "Scrotumface", "Bumgravy", "Dingleberry", "Spunktrumpet", "Twatburger"
-];
 const STARTING_UNREST = {
   "Centauri Republic": 1, "Earth Alliance": 1, "Minbari Federation": 1,
   "Narn Regime": 1, "Non-Aligned Worlds": 2
 };
+/* Starting tensions per the rules-rulings PDF (§8.1):
+   Narn/Centauri = 4, Human/Centauri = 1, Human/Minbari = 3, all others = 2. */
 const BASE_TENSION = {
-  "Centauri Republic":   {"Centauri Republic":2,"Earth Alliance":2,"Minbari Federation":2,"Narn Regime":4,"Non-Aligned Worlds":2},
-  "Earth Alliance":      {"Centauri Republic":2,"Earth Alliance":2,"Minbari Federation":1,"Narn Regime":2,"Non-Aligned Worlds":1},
-  "Minbari Federation":  {"Centauri Republic":2,"Earth Alliance":1,"Minbari Federation":2,"Narn Regime":1,"Non-Aligned Worlds":1},
-  "Narn Regime":         {"Centauri Republic":4,"Earth Alliance":2,"Minbari Federation":1,"Narn Regime":2,"Non-Aligned Worlds":1},
-  "Non-Aligned Worlds":  {"Centauri Republic":2,"Earth Alliance":1,"Minbari Federation":1,"Narn Regime":1,"Non-Aligned Worlds":2}
+  "Centauri Republic":   {"Centauri Republic":2,"Earth Alliance":1,"Minbari Federation":2,"Narn Regime":4,"Non-Aligned Worlds":2},
+  "Earth Alliance":      {"Centauri Republic":1,"Earth Alliance":2,"Minbari Federation":3,"Narn Regime":2,"Non-Aligned Worlds":2},
+  "Minbari Federation":  {"Centauri Republic":2,"Earth Alliance":3,"Minbari Federation":2,"Narn Regime":2,"Non-Aligned Worlds":2},
+  "Narn Regime":         {"Centauri Republic":4,"Earth Alliance":2,"Minbari Federation":2,"Narn Regime":2,"Non-Aligned Worlds":2},
+  "Non-Aligned Worlds":  {"Centauri Republic":2,"Earth Alliance":2,"Minbari Federation":2,"Narn Regime":2,"Non-Aligned Worlds":2}
 };
 const PLAYER_STAT_DEFAULTS = {
   influence: 4,
@@ -810,36 +800,14 @@ function saveState(msg){
 /* ── Helpers ── */
 function factionOptions(race){ return FACTIONS_BY_RACE[race]||["Home Faction","Babylon Project","Corporate"]; }
 function playerColor(i){ return PLAYER_COLORS[i % PLAYER_COLORS.length]; }
-/* Build a one-off substitution map for this game: each targeted name gets a
-   distinct random pick from the pool so two triggers in the same game don't
-   collide. Re-run on every buildDashboard() so every new game is a surprise. */
-function makeNameSubstitutionMap(setupPlayers){
-  const pool = SUBSTITUTION_POOL.slice();
-  // Fisher–Yates shuffle
-  for(let i = pool.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
-  }
-  const map = {};
-  let idx = 0;
-  setupPlayers.forEach(sp => {
-    const key = String(sp.name || "").trim().toLowerCase();
-    if(NAMES_TO_SUBSTITUTE.has(key) && !(key in map)){
-      map[key] = pool[idx % pool.length];
-      idx++;
-    }
-  });
-  return map;
-}
-function buildPlayer(sp, i, subMap){
+function buildPlayer(sp, i){
   const stats = {
     influence: PLAYER_STAT_DEFAULTS.influence,
     power: PLAYER_STAT_DEFAULTS.power,
     unrest: STARTING_UNREST[sp.race] ?? PLAYER_STAT_DEFAULTS.unrest,
     temporaryInfluence: PLAYER_STAT_DEFAULTS.temporaryInfluence
   };
-  const key = String(sp.name || "").trim().toLowerCase();
-  const displayName = (subMap && subMap[key]) || sp.name || ("Player "+(i+1));
+  const displayName = sp.name || ("Player "+(i+1));
   return {id:i+1, color:playerColor(i), name:displayName, race:sp.race, faction:sp.faction, factionLabel:sp.factionLabel||"", stats};
 }
 function generateTensions(players){
@@ -1360,8 +1328,7 @@ function buildDashboard(){
   state.round = 1;
   state.tableLabel = document.getElementById("tableLabel").value.trim();
   const srcPlayers = state.setup.players.slice(0, state.setup.playerCount);
-  const subMap = makeNameSubstitutionMap(srcPlayers);
-  state.players = srcPlayers.map((sp, i) => buildPlayer(sp, i, subMap));
+  state.players = srcPlayers.map((sp, i) => buildPlayer(sp, i));
   state.tensions = generateTensions(state.players);
   state.shared = sharedDefaults();
   state.notes = "";
@@ -1445,3 +1412,4 @@ saveState("Ready.");
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
