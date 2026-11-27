@@ -29,7 +29,7 @@
 }
 * { box-sizing: border-box; }
 html, body { background: var(--bg); color: var(--fg); margin: 0; }
-body { font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.45; }
 .wrap {
   max-width: 1320px; margin: 0 auto;
   padding-block: 16px 40px;
@@ -43,11 +43,16 @@ h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 
 h2 { font-family: var(--font-display); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; margin: 0; color: var(--gold); }
 h3 { font-family: var(--font-display); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; margin: 0; color: var(--muted); font-weight: 400; }
 p { margin: 0; }
-.muted { color: var(--muted); font-size: 13px; }
+.muted { color: var(--muted); font-size: 14px; }
 b.v { font-variant-numeric: tabular-nums; }
 
-/* Status bar */
-.status { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; background: var(--panel); border: 2px solid var(--line); padding: 8px 12px; font-size: 13px; }
+/* Status bar: resources you spend, then standing you are scored on */
+.status { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: stretch; background: var(--panel); border: 2px solid var(--line); padding: 8px 10px; font-size: 13px; }
+.sgroup { display: grid; gap: 3px; padding: 4px 10px; background: #0d1229; border: 1px solid var(--line); }
+.sgroup > .glabel { font-family: var(--font-display); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.sgroup.res { border-color: #3b5a9a; } .sgroup.res > .glabel { color: #8fb4ff; }
+.sgroup.score { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); } .sgroup.score > .glabel { color: var(--gold); }
+.sgroup .row { gap: 4px 14px; }
 .stat { display: inline-flex; align-items: baseline; gap: 5px; white-space: nowrap; }
 .stat i { font-style: normal; color: var(--muted); font-size: 11px; font-family: var(--font-display); letter-spacing: .05em; text-transform: uppercase; }
 .stat b { font-family: var(--font-display); font-size: 14px; font-variant-numeric: tabular-nums; }
@@ -57,8 +62,39 @@ b.v { font-variant-numeric: tabular-nums; }
 .gatebar span.off { background: #3a2030; }
 .status .spacer { flex: 1; }
 
-.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: start; }
-@media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 410px; gap: 14px; align-items: start; }
+@media (max-width: 1040px) { .layout { grid-template-columns: 1fr; } }
+.under { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+.under > .wide { grid-column: 1 / -1; }
+@media (max-width: 760px) { .under { grid-template-columns: 1fr; } }
+/* The turn: five steps, one at a time */
+.side { position: sticky; top: 12px; }
+@media (max-width: 1040px) { .side { position: static; } }
+.steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.steps button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px; background: var(--panel-2); border: 2px solid transparent; font-family: var(--font-display); font-size: 10px; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); position: relative; }
+.steps button b { font-size: 15px; color: var(--fg); font-weight: 400; }
+.steps button[aria-current="step"] { border-color: var(--gold); color: var(--gold); background: #1d2756; }
+.steps button.done b::after { content: " ✓"; color: var(--good); font-size: 11px; }
+.steps button .badge { position: absolute; top: -6px; right: -4px; background: var(--gold); color: #1a1205; font-size: 9px; padding: 1px 4px; border: 2px solid #050713; }
+.stepintro { font-size: 14px; color: var(--fg); background: #0d1229; border-left: 4px solid var(--gold); padding: 7px 10px; }
+.stepbody { display: grid; gap: 12px; min-width: 0; }
+.notice { font-size: 13px; padding: 6px 10px; background: color-mix(in srgb, var(--gold) 12%, var(--panel)); border: 1px solid var(--gold); }
+.review { display: grid; gap: 8px; }
+.review section { display: grid; gap: 4px; padding: 8px 10px; background: #0d1229; border: 1px solid var(--line); }
+.review section .row.between h3 { color: var(--gold); }
+.review ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; font-size: 14px; }
+.review .warns { border-color: color-mix(in srgb, var(--bad) 55%, var(--line)); }
+.review .warns li { color: #ffc0c0; }
+@media (max-width: 520px) { .board th:nth-child(4), .board td:nth-child(4), .board th:nth-child(5), .board td:nth-child(5) { display: none; } .zoomctl button { width: 28px; height: 26px; } }
+.board td .bar { display: block; height: 6px; margin-top: 3px; border: 1px solid #050713; background: #0b1024; position: relative; min-width: 60px; }
+.board td .bar i { position: absolute; inset: 0 auto 0 0; background: var(--gold); }
+.board td .bar i.lead { background: var(--good); }
+.board tr.mine td { background: #151d42; }
+.howgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.howgrid section { display: grid; gap: 6px; align-content: start; padding: 10px 12px; background: #0d1229; border: 1px solid var(--line); }
+.howgrid h3 { color: var(--gold); font-size: 12px; }
+.howgrid ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.lead { font-size: 16px; }
 
 /* Map */
 .mapcol { display: grid; gap: 10px; min-width: 0; }
@@ -67,7 +103,14 @@ b.v { font-variant-numeric: tabular-nums; }
   border: 3px solid #050713; outline: 2px solid var(--line); border-radius: 6px; overflow: hidden; background: #050816;
 }
 .screen canvas { width: 100%; height: 100%; display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
-#map { cursor: crosshair; }
+#map { cursor: crosshair; touch-action: none; }
+#map.grab { cursor: grabbing; }
+.screen.mapscreen::after { display: none; }
+.zoomctl { position: absolute; top: 8px; right: 8px; display: grid; gap: 4px; }
+.zoomctl button { width: 34px; height: 30px; font-family: var(--font-display); font-size: 15px; background: rgba(16, 22, 47, .88); border: 2px solid var(--line); color: var(--fg); }
+.zoomctl button:hover { border-color: var(--gold); }
+.zoomctl button.fit { font-size: 9px; }
+.zoomctl output { font-family: var(--font-display); font-size: 10px; text-align: center; color: var(--muted); background: rgba(16, 22, 47, .88); padding: 2px 0; }
 .screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
 .hint { font-size: 13px; color: var(--muted); min-height: 1.4em; }
 .hint b { color: var(--gold); font-weight: 600; }
@@ -145,7 +188,7 @@ ol.orders { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
 ol.orders li { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; font-size: 13px; padding: 6px 8px; background: var(--panel-2); }
 ol.orders li .n { font-family: var(--font-display); color: var(--gold); }
 ol.orders li.empty { background: transparent; border: 2px dashed var(--line); color: var(--muted); }
-table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
 th, td { padding: 4px 5px; border-bottom: 1px solid var(--line); text-align: right; }
 th:first-child, td:first-child { text-align: left; }
 thead th { font-family: var(--font-display); font-size: 9px; letter-spacing: .06em; color: var(--muted); font-weight: 400; }
@@ -156,21 +199,24 @@ td .who { display: inline-flex; align-items: center; gap: 6px; }
 .meter i { position: absolute; inset: 0 auto 0 0; background: var(--gold); }
 details summary { cursor: pointer; font-family: var(--font-display); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 details[open] summary { margin-bottom: 6px; }
-ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 13px; }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
 
 /* Dialogs */
+#setup, #how { max-width: min(1180px, calc(100vw - 32px)); }
+#report { max-width: min(960px, calc(100vw - 32px)); }
 dialog { overflow-x: hidden; background: var(--panel); color: var(--fg); border: 3px solid #050713; outline: 2px solid var(--line); padding: 0; max-width: min(860px, calc(100vw - 32px)); width: 100%; max-height: calc(100vh - 32px); }
 dialog::backdrop { background: rgba(4, 6, 16, .78); }
 .dlg { padding: 18px; display: grid; gap: 14px; min-width: 0; }
 .dlg > * { min-width: 0; }
-.dlg h2 { font-size: 16px; }
-.houses { display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); gap: 8px; }
+.dlg h2 { font-size: 18px; }
+.dlg { font-size: 15px; }
+.houses { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 @media (max-width: 640px) { .houses { grid-template-columns: 1fr 1fr; } .housepick { padding: 8px; } }
-.housepick { display: grid; gap: 4px; text-align: left; padding: 9px 10px; background: var(--panel-2); border: 2px solid transparent; }
+.housepick { display: grid; gap: 5px; text-align: left; padding: 11px 12px; background: var(--panel-2); border: 2px solid transparent; }
 .housepick[aria-pressed="true"] { border-color: var(--gold); background: #1d2756; }
 .housepick .top { display: flex; align-items: center; gap: 8px; }
-.housepick b { font-weight: 600; }
-.housepick span { font-size: 12px; color: var(--muted); line-height: 1.35; }
+.housepick b { font-weight: 600; font-size: 16px; }
+.housepick span { font-size: 14px; color: var(--muted); line-height: 1.35; }
 .housepick .rates { display: grid; grid-template-columns: auto 1fr; gap: 2px 8px; align-items: center; margin-top: 2px; }
 .pips { display: inline-flex; gap: 3px; align-items: center; vertical-align: middle; }
 .pips i { width: 9px; height: 9px; border: 2px solid #050713; background: #0b1024; display: inline-block; }
@@ -178,13 +224,13 @@ dialog::backdrop { background: rgba(4, 6, 16, .78); }
 .profile { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
 .profile section { display: grid; gap: 5px; align-content: start; padding: 9px 10px; background: #0d1229; border: 1px solid var(--line); min-width: 0; }
 .profile h3 { display: flex; align-items: center; gap: 8px; }
-.profile ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; font-size: 13px; }
+.profile ul { margin: 0; padding-left: 16px; display: grid; gap: 4px; font-size: 14px; }
 .profile b { font-weight: 600; color: var(--fg); }
 .profile .weak { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
 .tag.claim { color: var(--accent-light); border-color: var(--accent-light); }
 .events li.home { border-left-color: #e6a8ff; }
 .homebox { display: grid; gap: 4px; padding: 8px 10px; background: #0d1229; border-left: 4px solid #e6a8ff; font-size: 13px; }
-.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13px; }
+.events { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
 .events li { padding: 5px 8px; background: #0d1229; border-left: 3px solid var(--line); }
 .events li.battle { border-left-color: var(--bad); }
 .events li.capture { border-left-color: var(--accent-light); }
@@ -201,6 +247,7 @@ dialog::backdrop { background: rgba(4, 6, 16, .78); }
 .outcome.win { color: var(--good); } .outcome.loss { color: var(--bad); }
 .replay { display: grid; gap: 6px; }
 .replay[hidden] { display: none; }
+.bcard.playing { border-color: var(--gold); }
 .big2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 640px) { .big2 { grid-template-columns: 1fr; } }
 footer { color: var(--muted); font-size: 12px; }
@@ -249,7 +296,8 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
 
   <div class="layout">
     <section class="mapcol" aria-label="Star map">
-      <div class="screen"><canvas id="map" width="480" height="270" aria-label="Pixel-art star map. Click a system to select it."></canvas></div>
+      <div class="screen mapscreen"><canvas id="map" width="960" height="540" aria-label="Pixel-art star map. Click a system to select it. Scroll or use the buttons to zoom, drag to move around."></canvas>
+        <div class="zoomctl" role="group" aria-label="Map zoom"><button data-zoom="in" aria-label="Zoom in">+</button><output id="zoomLbl">1×</output><button data-zoom="out" aria-label="Zoom out">−</button><button class="fit" data-zoom="fit" aria-label="Show the whole map">Fit</button></div></div>
       <p class="hint" id="hint"></p>
       <div class="legend">
         <span><i class="dot" style="background:#c9955a"></i>Credits world</span>
@@ -261,20 +309,24 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
         <span><i class="dot" style="background:#7fe0a0"></i>Treaty link</span>
         <button class="btn small" id="overlayBtn" aria-pressed="true">Treaty links: on</button>
       </div>
+      <div class="under">
+        <section class="card" aria-labelledby="h-board"><h2 id="h-board">Leaderboard</h2><div id="boardCard"></div></section>
+        <section class="card" aria-labelledby="h-sel"><h2 id="h-sel">Selected system</h2><div id="selCard"></div></section>
+        <section class="card wide" aria-labelledby="h-you"><h2 id="h-you">Your house</h2><div id="youCard"></div></section>
+      </div>
     </section>
 
     <aside class="side">
-      <section class="card hot" aria-labelledby="h-round"><h2 id="h-round">This round</h2><div id="roundCard"></div></section>
-      <section class="card" aria-labelledby="h-sel"><h2 id="h-sel">Selected</h2><div id="selCard"></div></section>
-      <section class="card" aria-labelledby="h-orders"><h2 id="h-orders">Orders</h2><div id="ordersCard"></div></section>
-      <section class="card" aria-labelledby="h-home"><h2 id="h-home">At home</h2><div id="homeCard"></div></section>
-      <section class="card" aria-labelledby="h-houses"><h2 id="h-houses">Houses and diplomacy</h2><div id="housesCard"></div></section>
-      <section class="card" aria-labelledby="h-away"><h2 id="h-away">While you're away</h2><div id="awayCard"></div></section>
-      <section class="card" aria-labelledby="h-you"><h2 id="h-you">Your house</h2><div id="youCard"></div></section>
+      <section class="card hot" aria-labelledby="h-turn">
+        <div class="row between"><h2 id="h-turn">Your turn</h2><span class="muted" id="turnLbl"></span></div>
+        <nav class="steps" id="steps" aria-label="Steps of your turn"></nav>
+        <div class="stepbody" id="stepBody"></div>
+        <div class="row between" id="stepNav"></div>
+      </section>
     </aside>
   </div>
 
-  <footer>Prototype for the Gatekeepers design draft. The other houses are simple computer players. In the real game they would be your friends, and everyone's orders would resolve together once a day. Battles use exactly the same rules as the battle prototype, and each one can be replayed from the round report.</footer>
+  <footer>Prototype for the Gatekeepers design draft. The other houses are simple computer players. In the real game they would be your friends, and everyone's orders would resolve together once a day. Battles use exactly the same rules as the battle prototype, and the round report plays them back.</footer>
 </div>
 
 <dialog id="setup" aria-labelledby="h-setup"><div class="dlg" id="setupBody"></div></dialog>
@@ -282,25 +334,44 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
 <dialog id="diplo" aria-labelledby="h-diplo"><div class="dlg" id="diploBody"></div></dialog>
 <dialog id="how" aria-labelledby="h-how"><div class="dlg">
   <h2 id="h-how">How to play</h2>
-  <ul class="plain">
-    <li><b>Goal:</b> have the most prestige when the last round ends. Prestige comes from holding systems (1 per system each round), winning battles, taking systems, repairing gates and your secret objective.</li>
-    <li><b>Shared threat:</b> each round one jump gate is failing. Everyone can secretly send fuel to repair it. If too little arrives, it goes dark for good and the routes through it close. If 5 gates go dark, the empire collapses and <b>everyone loses</b>.</li>
-    <li><b>Three orders a round:</b> move a fleet one step, build ships at a system you own, send resources to another house, or govern at home (a festival or a proclamation). Voting, taxes, gate repairs, diplomacy and fleet settings are free.</li>
-    <li><b>Moving:</b> select your fleet, press Move, then click a neighbouring system. Crossing a jump gate costs fuel.</li>
-    <li><b>Battles:</b> when rival fleets end up in the same system, they fight automatically using their formation, doctrine and retreat setting. The Concord capital is neutral ground: no battles there.</li>
-    <li><b>Taking systems:</b> a system is yours when your fleet is the only one there at the end of a round. Taking a system another house owns needs at least 2 squadrons (its militia fights off smaller raids): 3 if its owner is popular, just 1 if its owner is in revolt. A conquered system is restless for 3 rounds and yields nothing yet.</li>
-    <li><b>The home front:</b> every house has a public <b>mandate</b> out of 10: how firmly its people back it. Victories, light taxes, festivals and proclamations raise it. Defeats, lost systems, heavy taxes, dark gates beside your systems, council decrees against you, paying tribute and wars without a claim lower it. Popular houses (7+) get more influence and tougher militia. Restless houses (3 or less) suffer strikes. A house in revolt (1 or less) has only 2 orders, its militia folds and its fresh conquests break away.</li>
-    <li><b>Claims:</b> your people back a war against a house that has taken your system, fought you in your own system, raided you, betrayed you or defied your ultimatum (for 8 rounds), or that the council has censured, embargoed, sanctioned or crusaded against (3 rounds). Taking a system from a house you have no claim on costs you 1 mandate, and its people rally instead of losing heart.</li>
-    <li><b>Seven houses:</b> each is stronger at some of fleets, diplomacy and the home front, with its own ship and its own gambit (Varkas ultimatums, Solenne's gate writs, Meridian loans, Kestrel smugglers, Nyx whisper campaigns, Ashgrove aid, Synod crusades). See Your house.</li>
-    <li><b>Council:</b> each round there is one decree. Vote yes or no, and spend influence for extra votes. You can also table a motion: the motion with the most influence behind it becomes next round's decree.</li>
-    <li><b>Diplomacy:</b> press Talk next to a house to negotiate. Treaties bundle clauses (non-aggression, trade, shared sight, a repair compact, council backing, tribute) for 3, 5 or 10 rounds. The Concord seals them for 1 influence each and enforces them, and everyone can see them.</li>
-    <li><b>Honour:</b> every house has a public honour score out of 10 (your reputation abroad, as mandate is your standing at home). Binding treaties of 5 or more rounds that run their full term earn +1. Falling short on a payment costs 1. At the end, each point above 5 is worth +3 prestige, and each point below 5 costs 3.</li>
-    <li><b>Leaving a treaty:</b> denounce it (it ends after this round, no penalty) or betray it (it ends before tonight's battles, but you lose 3 honour and 10 prestige, your victim earns double prestige against you for 5 rounds, and the Concord tables a sanction against you).</li>
-    <li><b>Gate tolls:</b> crossing a gate costs fuel, paid to whoever holds the system on the far side. Trade partners cross each other's gates free.</li>
+  <p class="lead">Lead your house to the most prestige while the jump gates fail around you. Each round you work through five steps, then everyone's orders resolve together.</p>
+  <div class="howgrid">
+    <section><h3>Winning</h3><ul>
+      <li>Most <b>prestige</b> after the last round wins.</li>
+      <li><b>Ascendancy:</b> from the halfway round, a house with 25% more prestige than every rival wins at once.</li>
+      <li>If 5 gates go dark, the empire collapses and <b>everyone loses</b>.</li>
+      <li>Prestige comes from holding systems, winning battles, taking systems, repairing gates and your secret objective.</li></ul></section>
+    <section><h3>1 · Council</h3><ul>
+      <li>Vote yes or no on one decree. Spend influence for extra votes.</li>
+      <li>Table a motion: the one with the most influence behind it is next round's decree.</li>
+      <li>Secretly send fuel to the failing gate (amber). Too little and it goes dark for good.</li></ul></section>
+    <section><h3>2 · Fleets</h3><ul>
+      <li>You get <b>3 orders</b>: move a fleet one step, or build ships at a system you own.</li>
+      <li>Rival fleets in the same system fight automatically, using the formation and doctrine you set.</li>
+      <li>Be the only fleet in a system at round's end to take it. Owned systems need 2+ squadrons (militia).</li></ul></section>
+    <section><h3>3 · Diplomacy</h3><ul>
+      <li>Press <b>Talk</b> to make treaties from clauses: peace, trade, shared sight, repairs, votes, tribute.</li>
+      <li>Treaties are public and enforced. Keeping them earns <b>honour</b>; betraying one costs dearly.</li>
+      <li>Answer envoys before the round ends, or their houses take it as a snub.</li></ul></section>
+    <section><h3>4 · At home</h3><ul>
+      <li><b>Mandate</b> (0 to 10) is how firmly your people back you.</li>
+      <li>Victories, light taxes and festivals raise it; defeats, heavy taxes and unjust wars lower it.</li>
+      <li>Popular houses gain influence; a house in revolt loses an order and its fresh conquests.</li></ul></section>
+    <section><h3>5 · Review</h3><ul>
+      <li>Check every choice, go back to change any of them, then confirm.</li>
+      <li>The round report shows what happened and plays back your battles.</li></ul></section>
+  </div>
+  <details><summary>More rules</summary><ul class="plain">
+    <li><b>Resources versus standing:</b> credits, fuel and influence are spent. Prestige is your score; honour and mandate each add or take 2 to 3 prestige per point away from 5 at the end.</li>
+    <li><b>Claims:</b> your people back a war against a house that took your system, fought you at home, raided you, betrayed you or defied your ultimatum (8 rounds), or that the council censured, embargoed, sanctioned or crusaded against (3 rounds). Taking a system without a claim costs 1 mandate. Conquered systems pay nothing for 3 rounds.</li>
+    <li><b>Seven houses:</b> each is stronger at some of fleets, diplomacy and the home front, with its own ship and gambit (see Your house, under the map).</li>
+    <li><b>Leaving a treaty:</b> denounce it (ends after this round, no penalty) or betray it (ends before tonight's battles; −3 honour, −10 prestige and a sanction motion against you).</li>
+    <li><b>Gate tolls:</b> crossing a gate costs fuel, paid to whoever holds the far side. Trade partners cross free.</li>
     <li><b>Fog of war:</b> you only see fleets in and next to your systems and fleets.</li>
-    <li><b>Nobody is knocked out:</b> a house down to one system gets extra credits to rebuild, and a house with no systems can commission ships at the Concord capital.</li>
-    <li><b>Missing a round:</b> if you don't send orders, your standing orders apply: fleets hold, treaty payments continue, your standing gate repair goes out, and you vote with the majority. From the second missed round, a Concord steward runs your house with the settings in "While you're away". Stewards keep every treaty, never betray and start no wars. You're back in charge the moment you send orders again.</li>
-  </ul>
+    <li><b>Nobody is knocked out:</b> a house with no systems can build at the Concord capital.</li>
+    <li><b>Missing a round:</b> standing orders cover the first missed round; from the second, a Concord steward runs your house (settings in step 4, At home).</li>
+    <li><b>The map:</b> scroll or use + and − to zoom, drag to move around, Fit to see everything.</li>
+  </ul></details>
   <div class="row"><button class="btn primary" id="howClose">Got it</button></div>
 </div></dialog>
 
@@ -838,6 +909,7 @@ const RULES = {
   MAX: { compact: 3, tribute: 5, gift: 15 },
   // the home front: mandate is how firmly a house's people back its rule (0 to 10, public; levels in MANDATE_LEVELS)
   MANDATE: { start: 5, max: 10, ashgrove: 6, festival: 4, proclaim: 2, endBonus: 2, nyxMax: 7, solenneMin: 3 },
+  ASCEND: { ratio: 1.25, from: 0.5 }, // from halfway, a house with 25% more prestige than every rival wins at once
   RESTLESS: 3,         // a system taken from another house yields nothing for this many rounds (and breaks away if its new owner is in revolt)
   CLAIM: { attack: 8, decree: 3, crusade: 5 }, // rounds a claim lasts
   GAMBIT: { ultimatum: 2, writ: 2, whisper: 2 }, // influence cost of the house gambits
@@ -2268,7 +2340,8 @@ function resolveRound(g, humanOrders) {
   if (g.darkCount >= RULES.DARK_LIMIT) {
     g.over = true; g.result = { type: 'dark' };
     say('The gate network collapses. The empire falls dark, and every house loses.', 'all', 'dark');
-  } else if (round >= g.maxRounds) {
+  } else if (round >= g.maxRounds || ascendant(g)) {
+    const asc = ascendant(g), ascP = asc ? g.houses[asc].prestige : 0;
     for (const h of hs) {
       const H_ = g.houses[h], b = (H_.honour - RULES.HONOUR.start) * RULES.HONOUR.endBonus, mb = (H_.mandate - RULES.MANDATE.start) * RULES.MANDATE.endBonus;
       H_.prestige += b + mb; H_.honourBonus = b; H_.mandateBonus = mb;
@@ -2278,8 +2351,10 @@ function resolveRound(g, humanOrders) {
     for (const h of hs) if (done[h]) g.houses[h].prestige += RULES.P.objective;
     const ranking = hs.map(h => ({ h, prestige: g.houses[h].prestige, objective: OBJECTIVES[g.houses[h].objective.k].text(g.houses[h].objective), done: done[h], honour: g.houses[h].honour, honourBonus: g.houses[h].honourBonus, mandate: g.houses[h].mandate, mandateBonus: g.houses[h].mandateBonus }))
       .sort((a, b) => b.prestige - a.prestige);
-    g.over = true; g.result = { type: 'score', ranking };
-    say(hname(ranking[0].h) + ' wins the game with ' + ranking[0].prestige + ' prestige.', 'all', 'gate');
+    if (asc) ranking.unshift(...ranking.splice(ranking.findIndex(r => r.h === asc), 1));
+    g.over = true; g.result = { type: asc ? 'ascend' : 'score', ranking, round };
+    if (asc) say(hname(asc) + ' is ascendant: ' + ascP + ' prestige, at least a quarter more than any rival. It wins the game in round ' + round + '.', 'all', 'gate');
+    else say(hname(ranking[0].h) + ' wins the game with ' + ranking[0].prestige + ' prestige.', 'all', 'gate');
   } else {
     g.round++;
     g.effects = pending;
@@ -2296,6 +2371,18 @@ function resolveRound(g, humanOrders) {
   }
   return g.last;
 }
+// Ascendancy: the early victory. From the halfway round, a house whose prestige is at least
+// RULES.ASCEND.ratio times every rival's wins at the end of that round.
+function ascendFrom(g) { return Math.ceil(g.maxRounds * RULES.ASCEND.from); }
+function ascendTarget(g, h) {
+  const best = Math.max(0, ...houseKeys(g).filter(k => k !== h).map(k => g.houses[k].prestige));
+  return Math.max(1, Math.ceil(best * RULES.ASCEND.ratio));
+}
+function ascendant(g) {
+  if (g.round < ascendFrom(g) || g.round >= g.maxRounds) return null;
+  const top = houseKeys(g).sort((a, b) => g.houses[b].prestige - g.houses[a].prestige)[0];
+  return g.houses[top].prestige >= ascendTarget(g, top) ? top : null;
+}
 function ordinal(n) { return ['First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth'][n - 1] || n + 'th'; }
 function objectiveStatus(g, h) {
   const o = g.houses[h].objective, O = OBJECTIVES[o.k];
@@ -2311,8 +2398,14 @@ const SAVE_KEY = 'gatekeepers-starmap-v3';
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- Pixel drawing (C is the canvas currently being drawn) ----------
-const mapCv = $('map'), mapCtx = mapCv.getContext('2d');
+// The star map is painted at its pixel-art size (W x H) on mapLo, then copied to the visible canvas at the
+// screen's own resolution (sharp pixels, any zoom). Labels are drawn last at screen resolution so text stays crisp.
+const mapCv = $('map'), viewCtx = mapCv.getContext('2d');
+const mapLo = document.createElement('canvas'); mapLo.width = W; mapLo.height = H;
+const mapCtx = mapLo.getContext('2d');
 mapCtx.imageSmoothingEnabled = false;
+const view = { z: 1, x: 0, y: 0 };   // zoom, and the world point at the top-left of the view
+const ZMIN = 1, ZMAX = 4;
 let C = mapCtx;
 function px(x, y, col) { C.fillStyle = col; C.fillRect(Math.round(x), Math.round(y), 1, 1); }
 function pline(x0, y0, x1, y1, col) {
@@ -2404,7 +2497,7 @@ const ENGINE_ROWS = {};
 for (const k in SPRITES) ENGINE_ROWS[k] = SPRITES[k].map((r, i) => r[0] === 'e' ? i : -1).filter(i => i >= 0);
 
 // ---------- Backgrounds ----------
-function paintBackground(seed, nebulaY) {
+function paintBackground(seed, nebulaY, dim) {
   const bg = document.createElement('canvas'); bg.width = W; bg.height = H;
   const g = bg.getContext('2d');
   const grd = g.createLinearGradient(0, 0, 0, H); grd.addColorStop(0, '#060a1a'); grd.addColorStop(1, '#0b1129');
@@ -2415,9 +2508,10 @@ function paintBackground(seed, nebulaY) {
     const n = Math.sin(x * 0.021 + ph + Math.sin(y * 0.03) * 1.7) * 0.5 + Math.sin(y * 0.017 - x * 0.006 + 1.3 + ph) * 0.5 + Math.sin((x + y) * 0.045) * 0.18;
     const band = Math.exp(-Math.pow((y - nebulaY - Math.sin(x * 0.012 + ph) * 40) / 70, 2));
     const v = (n * 0.5 + 0.5) * band, th = (bayer[y & 3][x & 3] + 0.5) / 16;
-    if (v > 0.62 + th * 0.25) { g.fillStyle = '#24194f'; g.fillRect(x, y, 1, 1); }
-    else if (v > 0.42 + th * 0.25) { g.fillStyle = '#142350'; g.fillRect(x, y, 1, 1); }
-    else if (v > 0.3 + th * 0.2) { g.fillStyle = '#0e1940'; g.fillRect(x, y, 1, 1); }
+    const neb = dim ? ['#141236', '#0f1a3d', '#0c1533'] : ['#24194f', '#142350', '#0e1940'];  // the map's nebula is fainter, so text and planets stand out
+    if (v > 0.62 + th * 0.25) { g.fillStyle = neb[0]; g.fillRect(x, y, 1, 1); }
+    else if (v > 0.42 + th * 0.25) { g.fillStyle = neb[1]; g.fillRect(x, y, 1, 1); }
+    else if (v > 0.3 + th * 0.2) { g.fillStyle = neb[2]; g.fillRect(x, y, 1, 1); }
   }
   const r = mulberry32(seed + 7);
   for (let i = 0; i < 240; i++) {
@@ -2477,7 +2571,9 @@ function haloSprite(h) {
 
 // ---------- State ----------
 let game = null;
-const ui = { sel: null, selFleet: null, mode: null, hover: null, pick: null, gift: null, anim: null, pre: null, orders: null, talk: null, draft: null, reply: null, confirmBetray: false, showTreaties: true };
+const ui = { sel: null, selFleet: null, mode: null, hover: null, pick: null, gift: null, anim: null, pre: null, orders: null, talk: null, draft: null, reply: null, confirmBetray: false, showTreaties: true, step: 'council', seen: new Set() };
+// The turn is walked through in five steps; any step can be revisited before confirming in Review.
+const STEPS = [['council', 'Council'], ['fleets', 'Fleets'], ['diplomacy', 'Diplomacy'], ['home', 'At home'], ['review', 'Review']];
 const blankDraft = () => ({ nap: false, trade: false, sight: false, compact: 0, backing: 'none', tribute: 'none', tribRes: 'credits', tribAmt: 2, gift: 'none', giftRes: 'credits', giftAmt: 3, loan: 0, rounds: 5 });
 const DECREE_LABEL = { embargo: 'Embargo a house', censure: 'Censure a house', sanction: 'Sanction a house', bounty: 'War bounty', ceasefire: 'Ceasefire in a region', levy: 'Gate levy', openLanes: 'Open lanes', crusade: 'Crusade against a house' };
 const CLAUSE_SHORT = { nap: 'Peace', trade: 'Trade', sight: 'Sight', compact: 'Compact', backing: 'Backing', tribute: 'Tribute', loan: 'Loan' };
@@ -2560,15 +2656,6 @@ function drawMap(dt) {
   C.drawImage(mapBg, 0, 0);
   for (const t of twinkles) { const v = Math.sin(now * t.s + t.p); if (v > 0.4) px(t.x, t.y, v > 0.9 ? '#ffffff' : '#9fb0e0'); }
   const V = vis();
-  // cluster names
-  for (let c = 0; c < 7; c++) {
-    const ss = game.systems.filter(s => s.cluster === c);
-    const mx = ss.reduce((a, s) => a + s.x, 0) / ss.length, my = ss.reduce((a, s) => a + s.y, 0) / ss.length;
-    const dx = mx - W / 2, dy = my - H / 2, dl = Math.hypot(dx, dy) || 1;
-    const x = Math.max(44, Math.min(W - 44, mx - dx / dl * 40)), y = Math.max(2, Math.min(H - 10, my - dy / dl * 32 - 4));
-    C.font = '8px Silkscreen, monospace'; C.textBaseline = 'top'; C.textAlign = 'center'; C.fillStyle = '#2e3a70';
-    C.fillText(CLUSTER_NAMES[c].toUpperCase(), Math.round(x), Math.round(y));
-  }
   // territory
   C.globalAlpha = 0.75;
   for (const s of game.systems) if (s.owner) { const h = haloSprite(s.owner); C.drawImage(h, s.x - 13, s.y - 13); }
@@ -2651,9 +2738,65 @@ function drawMap(dt) {
     else pellipse(p.x, p.y, p.r * (0.3 + a), p.r * (0.3 + a), a < 0.5 ? '#ffffff' : '#ff4a6a', 1);
   }
   for (let i = mapFx.length - 1; i >= 0; i--) if (mapFx[i].life <= 0) mapFx.splice(i, 1);
-  // hover label
-  const lab = ui.hover != null ? ui.hover : ui.sel;
-  if (lab != null) { const s = sysAt(lab); drawText(s.name, s.x, s.y + sysR(s) + 3, '#e7eaf8'); }
+}
+// Copy the pixel-art map to the screen at the current zoom, then draw labels at full resolution.
+function clampView() {
+  view.z = Math.max(ZMIN, Math.min(ZMAX, view.z));
+  view.x = Math.max(0, Math.min(W - W / view.z, view.x)); view.y = Math.max(0, Math.min(H - H / view.z, view.y));
+}
+function zoomAt(z, wx, wy) {
+  const fx = (wx - view.x) / (W / view.z), fy = (wy - view.y) / (H / view.z);
+  view.z = Math.max(ZMIN, Math.min(ZMAX, z));
+  view.x = wx - fx * W / view.z; view.y = wy - fy * H / view.z; clampView();
+  const zl = $('zoomLbl'); if (zl) zl.textContent = (Math.round(view.z * 10) / 10) + '×';
+}
+function centreOn(sid) {
+  if (view.z <= 1 || sid == null) return;
+  const s = sysAt(sid), vw = W / view.z, vh = H / view.z;
+  if (s.x > view.x + vw * 0.15 && s.x < view.x + vw * 0.85 && s.y > view.y + vh * 0.15 && s.y < view.y + vh * 0.85) return; // already in view
+  view.x = s.x - vw / 2; view.y = s.y - vh / 2; clampView();
+}
+let clusterLabels = null;
+function presentMap() {
+  const r = mapCv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const cw = Math.max(1, Math.round(r.width * dpr)), ch = Math.max(1, Math.round(r.height * dpr));
+  if (mapCv.width !== cw || mapCv.height !== ch) { mapCv.width = cw; mapCv.height = ch; }
+  const V = viewCtx;
+  V.imageSmoothingEnabled = false;
+  V.drawImage(mapLo, view.x, view.y, W / view.z, H / view.z, 0, 0, cw, ch);
+  if (!game) return;
+  const k = cw / (W / view.z), sx = x => (x - view.x) * k, sy = y => (y - view.y) * k;
+  const fit = Math.max(0.62, Math.min(1, r.width / 820));   // smaller labels on a phone-sized map
+  const label = (text, x, y, size, col, outline) => {
+    V.font = `600 ${Math.round(size * dpr)}px "Chakra Petch", "Segoe UI", sans-serif`;
+    V.textAlign = 'center'; V.textBaseline = 'top'; V.lineJoin = 'round';
+    if (outline) { V.lineWidth = 4 * dpr; V.strokeStyle = 'rgba(5, 7, 19, .92)'; V.strokeText(text, x, y); }
+    V.fillStyle = col; V.fillText(text, x, y);
+  };
+  // region names, faint, placed outside each cluster
+  if (!clusterLabels || clusterLabels.seed !== game.seed) {
+    clusterLabels = { seed: game.seed, pos: [] };
+    for (let c = 0; c < 7; c++) {
+      const ss = game.systems.filter(s => s.cluster === c);
+      if (!ss.length) continue;
+      const mx = ss.reduce((a, s) => a + s.x, 0) / ss.length, my = ss.reduce((a, s) => a + s.y, 0) / ss.length;
+      const dx = mx - W / 2, dy = my - H / 2, dl = Math.hypot(dx, dy) || 1;
+      clusterLabels.pos.push({ c, x: Math.max(50, Math.min(W - 50, mx - dx / dl * 40)), y: Math.max(3, Math.min(H - 12, my - dy / dl * 32 - 4)) });
+    }
+  }
+  V.save(); V.letterSpacing = '2px';
+  for (const p of clusterLabels.pos) {
+    V.font = `${Math.round(Math.min(13, 9 + view.z * 1.5) * fit * dpr)}px Silkscreen, monospace`; V.textAlign = 'center'; V.textBaseline = 'top';
+    V.fillStyle = '#4a5aa0'; V.fillText(CLUSTER_NAMES[p.c].toUpperCase(), sx(p.x), sy(p.y));
+  }
+  V.restore();
+  // system names: all of them once zoomed in, otherwise the one under the pointer and the selected one
+  const names = view.z >= 1.5 ? game.systems.map(s => s.id) : [ui.sel, ui.hover].filter(x => x != null);
+  for (const id of new Set(names)) {
+    const s = sysAt(id), hot = id === ui.sel || id === ui.hover;
+    const col = hot ? '#ffffff' : s.owner === human() ? HOUSES[human()].pal.light : '#c4cbea';
+    label(s.name, sx(s.x), sy(s.y + sysR(s) + 2), (hot ? 14 : 12) * fit, col, true);
+  }
 }
 const mapFx = [];
 function housePos(h) { const home = sysAt(game.houses[h].home); if (home.owner === h) return home; return game.systems.find(s => s.owner === h) || null; }
@@ -2781,6 +2924,7 @@ function frame(t) {
   const dt = Math.max(0, Math.min(0.05, (t - lastT) / 1000)); lastT = t; now += dt;
   if (ui.anim) { ui.anim.t += dt / ui.anim.dur; if (ui.anim.t >= 1.7) { const done = ui.anim.done; ui.anim = null; if (done) done(); } }
   drawMap(dt);
+  presentMap();
   if (replay.active) stepReplay(dt);
   requestAnimationFrame(frame);
 }
@@ -2795,19 +2939,18 @@ function renderStatus() {
   const rank = houseKeys(game).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige).indexOf(human()) + 1;
   const ch = (now_, after) => after !== now_ ? `<b class="v">${now_}</b><small>→ ${after}</small>` : `<b class="v">${now_}</b>`;
   $('status').innerHTML = `
-    <span class="stat"><i>Round</i><b>${game.round}</b><small>of ${game.maxRounds}</small></span>
-    <span class="stat">${swatch(human())}<b style="font-size:12px">${HOUSES[human()].short}</b></span>
-    <span class="stat"><i>Credits</i>${ch(m.credits, p.c)}</span>
-    <span class="stat"><i>Fuel</i>${ch(m.fuel, p.f)}</span>
-    <span class="stat"><i>Influence</i>${ch(m.influence, p.i)}</span>
-    <span class="stat"><i>Prestige</i><b class="v">${m.prestige}</b><small>#${rank}</small></span>
-    <span class="stat" title="${honourLabel(m.honour)}: your reputation with other houses"><i>Honour</i><b class="v">${m.honour}</b><small>/10</small></span>
-    <span class="stat" title="${mandateLevel(m.mandate)[2]}: ${mandateLevel(m.mandate)[3]}"><i>Mandate</i><b class="v" style="color:${mcolor(m.mandate)}">${m.mandate}</b><small>${mandateLevel(m.mandate)[2]}</small></span>
-    <span class="spacer"></span>
-    <span class="stat" title="If ${RULES.DARK_LIMIT} gates go dark, everyone loses"><i>Dark gates</i><span class="gatebar">${Array.from({ length: RULES.DARK_LIMIT }, (_, i) => `<span class="${i < game.darkCount ? 'off' : ''}"></span>`).join('')}</span><small>${game.darkCount}/${RULES.DARK_LIMIT}</small></span>
-    <span class="stat"><i>Orders</i><b>${ordersLeft()}</b><small>left</small></span>`;
+    <div class="sgroup"><span class="glabel">Round</span><div class="row"><span class="stat"><b>${game.round}</b><small>of ${game.maxRounds}</small></span><span class="stat">${swatch(human())}<b style="font-size:12px">${HOUSES[human()].short}</b></span></div></div>
+    <div class="sgroup res"><span class="glabel">Resources · you spend these</span><div class="row">
+      <span class="stat" title="Credits: build ships, hold festivals, pay tribute and gifts. Your systems produce more each round."><i>Credits</i>${ch(m.credits, p.c)}</span>
+      <span class="stat" title="Fuel: gate tolls and gate repairs."><i>Fuel</i>${ch(m.fuel, p.f)}</span>
+      <span class="stat" title="Influence: extra votes, motions, sealing treaties, proclamations and gambits."><i>Influence</i>${ch(m.influence, p.i)}</span></div></div>
+    <div class="sgroup score"><span class="glabel">Standing · prestige wins the game</span><div class="row">
+      <span class="stat" title="Prestige decides the winner. You are ranked #${rank}."><i>Prestige</i><b class="v">${m.prestige}</b><small>#${rank} of ${houseKeys(game).length}</small></span>
+      <span class="stat" title="${honourLabel(m.honour)}: your reputation with other houses. Worth ±${RULES.HONOUR.endBonus} prestige per point from 5 at the end."><i>Honour</i><b class="v">${m.honour}</b><small>/10</small></span>
+      <span class="stat" title="${mandateLevel(m.mandate)[2]}: ${mandateLevel(m.mandate)[3]} Worth ±${RULES.MANDATE.endBonus} prestige per point from 5 at the end."><i>Mandate</i><b class="v" style="color:${mcolor(m.mandate)}">${m.mandate}</b><small>${mandateLevel(m.mandate)[2]}</small></span></div></div>
+    <div class="sgroup" title="If ${RULES.DARK_LIMIT} gates go dark, the empire collapses and everyone loses."><span class="glabel">Shared threat</span><div class="row"><span class="stat"><i>Dark gates</i><span class="gatebar">${Array.from({ length: RULES.DARK_LIMIT }, (_, i) => `<span class="${i < game.darkCount ? 'off' : ''}"></span>`).join('')}</span><small>${game.darkCount}/${RULES.DARK_LIMIT}</small></span></div></div>`;
 }
-function renderRound() {
+function councilHtml() {
   const gate = game.lanes[game.dim], v = ui.orders.vote, h = human(), d = game.decree, bound = boundTo(game, h);
   const eff = [];
   if (game.effects.embargo) eff.push(`Embargo on ${hname(game.effects.embargo)}: no gate travel.`);
@@ -2827,8 +2970,7 @@ function renderRound() {
   const targetSel = !m ? '' : AIMED.includes(m.type)
     ? `<select data-msel="target" aria-label="Motion target">${houseKeys(game).filter(k => k !== h).map(k => `<option value="${k}"${m.target === k ? ' selected' : ''}>${HOUSES[k].short}</option>`).join('')}</select>`
     : m.type === 'ceasefire' ? `<select data-msel="target" aria-label="Motion region">${CLUSTER_NAMES.map((n, i) => `<option value="${i}"${m.target === i ? ' selected' : ''}>${n}</option>`).join('')}</select>` : '';
-  $('roundCard').innerHTML = `
-    ${game.inbox.length ? `<div class="envoys"><b>Envoys are waiting for your answer</b><div class="row">${game.inbox.map(e => `<button class="btn small" data-talk="${e.from}">${swatch(e.from)} ${HOUSES[e.from].short}</button>`).join('')}</div><span class="muted">Unanswered envoys leave when the round ends, and their houses take it as a snub.</span></div>` : ''}
+  return `
     ${eff.length ? `<p class="muted">In force this round: ${eff.join(' ')}</p>` : ''}
     <div class="decree" style="border-color:#ffb03a">
       <h3>The Dimming</h3>
@@ -2883,18 +3025,23 @@ function renderSel() {
     <dl class="kv"><dt>Region</dt><dd>${s.capital ? 'The Concord capital (neutral, no battles)' : CLUSTER_NAMES[s.cluster]}</dd><dt>Yields</dt><dd>${yl} a round</dd>${!seen ? '<dt>Scouting</dt><dd>Out of sight: fleets here are hidden</dd>' : ''}
       ${s.owner && !s.capital ? `<dt>Militia</dt><dd>${militiaNeed(game, s.owner)}+ squadrons needed to take it${s.owner !== h ? (hasClaim(game, h, s.owner) || s.prev === h ? ' (you have a claim)' : ' (no claim: costs you 1 mandate)') : ''}</dd>` : ''}
       ${isRestless(game, s) ? `<dt>Restless</dt><dd>Recently conquered: yields nothing until round ${s.restless + 1}</dd>` : ''}</dl>`;
-  if (mine.length) html += `<h3>Your fleets</h3><div class="fleets">${mine.map(f => `<button class="fleetbtn" data-fleet="${f.id}" aria-pressed="${sel && sel.id === f.id}"><img alt="" src="${iconURL(h, topHull(f))}"><span>${esc(f.name)}<br><small>${squads(f)} squadrons · ${DOCTRINES[f.doctrine].name}</small></span><small>${moveOrderFor(f.id) ? '→ ' + esc(sysAt(moveOrderFor(f.id).to).name) : ''}</small></button>`).join('')}</div>`;
+  if (mine.length) html += `<h3>Your fleets here</h3><div class="fleets">${mine.map(f => `<button class="fleetbtn" data-fleet="${f.id}" aria-pressed="${sel && sel.id === f.id}"><img alt="" src="${iconURL(h, topHull(f))}"><span>${esc(f.name)}<br><small>${squads(f)} squadrons · ${DOCTRINES[f.doctrine].name}</small></span><small>${moveOrderFor(f.id) ? '→ ' + esc(sysAt(moveOrderFor(f.id).to).name) : ''}</small></button>`).join('')}</div>`;
   if (rivals.length) html += `<h3>Other fleets</h3>${rivals.map(f => `<div class="enemy">${swatch(f.house)}<span>${HOUSES[f.house].short}</span>${!hostile(game, h, f.house) ? '<span class="tag peace">At peace</span>' : ''}${h === 'nyx' ? icons(f.house, f.grid) + `<span class="muted">${DOCTRINES[f.doctrine].name}</span>` : `<span class="muted">${squads(f)} squadrons (make-up unknown)</span>`}</div>`).join('')}`;
-  if (sel && sel.sys === s.id) html += fleetCard(sel);
-  if (canBuildAt(game, h, s.id)) {
+  if (canBuildAt(game, h, s.id)) html += `<div class="row"><button class="btn small" data-yard="${s.id}">Build ships here</button><span class="muted">(step 2, Fleets)</span></div>`;
+  $('selCard').innerHTML = html;
+}
+function buildHtml(sid) {
+  const s = sysAt(sid), h = human();
+  let html = '';
+  {
     const bo = buildOrderAt(s.id), cost = bo ? buildCost(h, bo.hulls) : 0, extra = x => buildCost(h, [...(bo ? bo.hulls : []), x]) - cost;
     if (s.capital) html += '<p class="muted">You hold no systems, so the Concord lets you commission ships here. Fleets at the capital are safe: no battles are allowed.</p>';
-    html += `<h3>Build here ${bo ? '' : '(1 order)'}</h3>
+    html += `<h3>Build at ${esc(s.name)} ${bo ? '' : '(1 order)'}</h3>
       <div class="palette">${hullsFor(h).map(x => `<button class="hullbtn${HULLS[x].house ? ' unique' : ''}" data-build="${x}" ${(!bo && ordersLeft() <= 0) || extra(x) > proj().c ? 'disabled' : ''} title="${esc(HULLS[x].role)}"><img alt="" src="${iconURL(h, x)}"><span>${HULLS[x].name}</span><span class="cost">${HULLS[x].cost} cr</span></button>`).join('')}</div>
       ${bo ? `<div class="row between"><span>${icons(h, bo.hulls)}<span class="muted"> ${cost} credits</span></span><button class="btn small" data-act="unbuild">Clear</button></div>` : '<p class="muted">New squadrons join a fleet here (or form a new one) when the round resolves.</p>'}
       ${h === 'meridian' ? `<p class="muted">Your shipyards take ${RULES.TWIST.shipyard} credits off every build order.</p>` : h === 'varkas' ? `<p class="muted">Your heavy armour adds ${RULES.TWIST.armourCost} credit to every build order.</p>` : ''}`;
   }
-  $('selCard').innerHTML = html;
+  return html;
 }
 function actionText(a) {
   if (a.type === 'move') { const f = game.fleets.find(x => x.id === a.fleet), mv = canMove(game, f, a.to); return `Move ${esc(f.name)} to ${esc(sysAt(a.to).name)}${mv.toll ? ` (toll ${mv.toll} fuel${mv.payee ? ' to ' + hname(mv.payee) : ''})` : ''}`; }
@@ -2902,34 +3049,56 @@ function actionText(a) {
   if (a.type === 'send') return `Send ${a.amt} ${a.res} to ${hname(a.to)}`;
   if (a.type === 'govern') return a.kind === 'festival' ? `Hold a festival (${RULES.MANDATE.festival} credits, +1 mandate)` : human() === 'synod' ? 'Preach sermons (+1 mandate)' : `Make a proclamation (${RULES.MANDATE.proclaim} influence, +1 mandate)`;
 }
-function renderOrders() {
+function ordersHtml() {
   const items = ui.orders.actions.map((a, i) => `<li><span class="n">${i + 1}</span><span>${actionText(a)}</span><button class="btn small" data-rm="${i}" aria-label="Remove order">✕</button></li>`);
   for (let i = ui.orders.actions.length; i < ordersFor(game, human()); i++) items.push(`<li class="empty"><span class="n">${i + 1}</span><span>Free order slot</span><span></span></li>`);
-  const p = proj(), bad = p.c < 0 || p.f < 0 || p.i < 0, o = ui.orders;
-  const bound = boundTo(game, human());
-  const extras = [bound ? `votes go with ${hname(bound)}` : `vote ${o.vote.yes ? 'yes' : 'no'} (${voteWeight(game, human(), o.vote)} votes)`, `repair ${o.repair} fuel`];
-  if (o.motion) extras.push(`motion: ${DECREE_LABEL[o.motion.type].toLowerCase()}${o.motion.target != null && AIMED.includes(o.motion.type) ? ' (' + hname(o.motion.target) + ')' : ''}, ${o.motion.inf} influence`);
-  const tx = o.taxes || me().taxes || 'normal';
-  if (tx !== 'normal') extras.push(`${tx} taxes`);
-  if (o.whisper) extras.push(`whisper campaign in ${hname(o.whisper)}`);
-  if (o.writ != null && game.lanes[o.writ]) extras.push(`seal ${game.lanes[o.writ].name}`);
-  for (const dd of o.diplo) extras.push(`<b style="color:${dd.type === 'betray' ? 'var(--bad)' : 'var(--gold)'}">${dd.type === 'betray' ? 'betray' : 'denounce'} your treaty with ${hname(dd.with)}</b>`);
-  $('ordersCard').innerHTML = `${mlevel(game, human()) === 'revolt' ? '<p class="muted" style="color:var(--bad)">Your house is in revolt: you have only 2 orders this round.</p>' : ''}<ol class="orders">${items.join('')}</ol>
-    <p class="muted">Free extras: ${extras.join('; ')}.</p>
-    <button class="btn primary big" id="endTurn" ${bad || game.over ? 'disabled' : ''}>End round ${game.round}</button>
-    ${bad ? '<p class="muted" style="color:var(--bad)">Your orders cost more than you have.</p>' : ''}`;
+  return `${mlevel(game, human()) === 'revolt' ? '<p class="muted" style="color:var(--bad)">Your house is in revolt: you have only 2 orders this round.</p>' : ''}<ol class="orders">${items.join('')}</ol>`;
 }
-function renderHouses() {
+function fleetsHtml() {
+  const h = human(), mine = game.fleets.filter(f => f.house === h && squads(f) > 0);
+  const sel = game.fleets.find(f => f.id === ui.selFleet && f.house === h && squads(f) > 0);
+  const yards = game.systems.filter(s => canBuildAt(game, h, s.id));
+  const bs = ui.sel != null && canBuildAt(game, h, ui.sel) ? ui.sel : null;
+  return `<div class="stepintro">You have <b>${ordersFor(game, h)} orders</b> this round. Moving a fleet one step or building ships at one of your systems uses one each. Gifts (step 3) and governing (step 4) use orders too.</div>
+    <div><h3>Your orders</h3>${ordersHtml()}</div>
+    <h3>Your fleets</h3>
+    ${mine.length ? `<div class="fleets">${mine.map(f => `<button class="fleetbtn" data-fleet="${f.id}" aria-pressed="${!!sel && sel.id === f.id}"><img alt="" src="${iconURL(h, topHull(f))}"><span>${esc(f.name)} <small>at ${esc(sysAt(f.sys).name)}</small><br><small>${squads(f)} squadrons · ${DOCTRINES[f.doctrine].name}</small></span><small>${moveOrderFor(f.id) ? '→ ' + esc(sysAt(moveOrderFor(f.id).to).name) : 'holding'}</small></button>`).join('')}</div>` : '<p class="muted">You have no fleets. Build some at one of your systems.</p>'}
+    ${sel ? fleetCard(sel) : mine.length ? '<p class="muted">Pick a fleet to move it or change its formation and doctrine.</p>' : ''}
+    <h3>Build ships</h3>
+    ${yards.length ? `<div class="row">${yards.map(s => `<button class="btn small${s.id === bs ? ' primary' : ''}" data-yard="${s.id}">${esc(s.name)}${buildOrderAt(s.id) ? ' ✓' : ''}</button>`).join('')}</div>` : '<p class="muted">You hold no system you can build at.</p>'}
+    ${bs != null ? buildHtml(bs) : yards.length ? '<p class="muted">Pick one of your systems to build there.</p>' : ''}`;
+}
+function diploHtml() {
   const h = human();
-  const hs = houseKeys(game).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige);
-  const badge = k => { const tr = treatyBetween(game, h, k); return tr ? `<span class="tag pact" title="${esc(termsText(tr.a, tr.b, tr.terms))}">${ongoingClauses(tr.terms).map(c => CLAUSE_SHORT[c]).join(' · ')}</span>` : '<span class="muted">—</span>'; };
-  $('housesCard').innerHTML = `<table><thead><tr><th>House</th><th title="Prestige">Prestige</th><th title="Systems held">Sys</th><th title="Honour out of 10: reputation abroad">Hon</th><th title="Mandate out of 10: support at home">Man</th><th></th></tr></thead><tbody>
-    ${hs.map(k => `<tr><td><span class="who">${swatch(k)}${HOUSES[k].short}${k === h ? ' <span class="tag you">You</span>' : ''}${game.inbox.some(e => e.from === k) ? ' <span class="tag envoy">Envoy</span>' : ''}${game.houses[k].missed >= 2 ? ' <span class="tag away" title="A Concord steward runs this house">Steward</span>' : ''}${k !== h && hasClaim(game, h, k) ? ' <span class="tag claim" title="You have a claim on this house: your people back a war against it">Claim</span>' : ''}</span>${k !== h ? `<br>${badge(k)}` : ''}</td>
-      <td>${game.houses[k].prestige}</td><td>${systemsOf(game, k).length}</td><td title="${honourLabel(game.houses[k].honour)}">${game.houses[k].honour}</td><td title="${mandateLevel(game.houses[k].mandate)[2]}" style="color:${mcolor(game.houses[k].mandate)}">${game.houses[k].mandate}</td>
-      <td>${k !== h ? `<button class="btn small" data-talk="${k}">Talk</button>` : ''}</td></tr>`).join('')}
+  const hs = houseKeys(game).filter(k => k !== h).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige);
+  const badge = k => { const tr = treatyBetween(game, h, k); return tr ? `<span class="tag pact" title="${esc(termsText(tr.a, tr.b, tr.terms))}">${ongoingClauses(tr.terms).map(c => CLAUSE_SHORT[c]).join(' · ')}</span>` : '<span class="muted">No treaty</span>'; };
+  return `<div class="stepintro">Press <b>Talk</b> to propose a treaty, answer an envoy or send a gift${{ varkas: ', or deliver an ultimatum', meridian: ', or offer a loan', nyx: ', or start a whisper campaign' }[h] || ''}. Talking is free; the Concord charges influence to seal a treaty, and a gift uses an order.</div>
+    ${game.inbox.length ? `<div class="envoys"><b>Envoys are waiting for your answer</b><div class="row">${game.inbox.map(e => `<button class="btn small" data-talk="${e.from}">${swatch(e.from)} ${HOUSES[e.from].short}</button>`).join('')}</div><span class="muted">Unanswered envoys leave when the round ends, and their houses take it as a snub.</span></div>` : ''}
+    <table><thead><tr><th>House</th><th style="text-align:left">Your treaty</th><th title="Honour out of 10: reputation abroad">Honour</th><th></th></tr></thead><tbody>
+    ${hs.map(k => `<tr><td><span class="who">${swatch(k)}${HOUSES[k].short}${game.inbox.some(e => e.from === k) ? ' <span class="tag envoy">Envoy</span>' : ''}${game.houses[k].missed >= 2 ? ' <span class="tag away" title="A Concord steward runs this house">Steward</span>' : ''}${hasClaim(game, h, k) ? ' <span class="tag claim" title="You have a claim on this house: your people back a war against it">Claim</span>' : ''}</span></td>
+      <td style="text-align:left">${badge(k)}</td><td title="${honourLabel(game.houses[k].honour)}">${game.houses[k].honour}</td>
+      <td><button class="btn small" data-talk="${k}">Talk</button></td></tr>`).join('')}
     </tbody></table>
+    ${ui.orders.diplo.length ? `<p class="muted">${ui.orders.diplo.map(dd => `<b style="color:${dd.type === 'betray' ? 'var(--bad)' : 'var(--gold)'}">You will ${dd.type} your treaty with ${hname(dd.with)}.</b>`).join(' ')}</p>` : ''}
     <h3>Treaties in force</h3>
     ${game.treaties.length ? `<ul class="plain">${game.treaties.map(tr => `<li><b>${HOUSES[tr.a].short} and ${HOUSES[tr.b].short}</b>: ${esc(termsText(tr.a, tr.b, tr.terms))} <span class="muted">(${tr.endNow ? 'ending after this round' : (tr.end - game.round + 1) + ' rounds left'})</span></li>`).join('')}</ul>` : '<p class="muted">None yet. Treaties are registered with the Concord, so everyone can see them.</p>'}`;
+}
+// ---------- Leaderboard ----------
+function renderBoard() {
+  const h = human(), hs = houseKeys(game).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige);
+  const from = ascendFrom(game), lead = hs[0], pc = Math.round((RULES.ASCEND.ratio - 1) * 100);
+  const rows = hs.map((k, i) => {
+    const H_ = game.houses[k], tg = ascendTarget(game, k), pct = Math.min(100, Math.round(100 * H_.prestige / tg));
+    return `<tr class="${k === h ? 'mine' : ''}"><td>${i + 1}</td><td style="text-align:left"><span class="who">${swatch(k)}${HOUSES[k].short}${k === h ? ' <span class="tag you">You</span>' : ''}${H_.missed >= 2 ? ' <span class="tag away">Steward</span>' : ''}</span>
+      <span class="bar" title="${H_.prestige} of the ${tg} prestige ${HOUSES[k].short} needs for ascendancy"><i class="${i === 0 ? 'lead' : ''}" style="width:${pct}%"></i></span></td>
+      <td><b>${H_.prestige}</b></td><td>${systemsOf(game, k).length}</td><td title="${honourLabel(H_.honour)}">${H_.honour}</td><td title="${mandateLevel(H_.mandate)[2]}" style="color:${mcolor(H_.mandate)}">${H_.mandate}</td></tr>`;
+  }).join('');
+  const asc = game.over ? '' : game.round < from
+    ? `<b>Ascendancy</b> from round ${from}: a house with ${pc}% more prestige than every rival wins at the end of that round. The bars show how close each house is.`
+    : `<b>Ascendancy is live:</b> a house with ${pc}% more prestige than every rival wins at the end of the round. ${lead === h ? `You lead: reach <b>${ascendTarget(game, h)}</b> prestige to win now.` : `${HOUSES[lead].short} needs ${ascendTarget(game, lead)}; you need ${ascendTarget(game, h)}.`}`;
+  $('boardCard').innerHTML = `<table class="board"><thead><tr><th>#</th><th style="text-align:left">House</th><th>Prestige</th><th title="Systems held">Systems</th><th title="Honour out of 10: reputation abroad">Honour</th><th title="Mandate out of 10: support at home">Mandate</th></tr></thead><tbody>${rows}</tbody></table>
+    ${asc ? `<p class="muted">${asc}</p>` : ''}
+    <p class="muted">Otherwise the game ends after round ${game.maxRounds} and the most prestige wins (honour, mandate and secret objectives add to it at the end). If ${RULES.DARK_LIMIT} gates go dark, everyone loses.</p>`;
 }
 function renderYou() {
   const h = human(), H_ = HOUSES[h], o = objectiveStatus(game, h), m = me();
@@ -2941,7 +3110,7 @@ function renderYou() {
     <div class="objective"><h3>Secret objective (+${RULES.P.objective} prestige)</h3><span>${o.text}</span><div class="meter"><i style="width:${Math.min(100, 100 * o.prog / o.goal)}%"></i></div><span class="muted">${o.prog} of ${o.goal}</span></div>`;
 }
 // ---------- At home: mandate, taxes, governing, claims ----------
-function renderHome() {
+function homeHtml() {
   const h = human(), m = me(), lv = mandateLevel(m.mandate), taxes = ui.orders.taxes || m.taxes || 'normal';
   const owned = systemsOf(game, h), gov = ui.orders.actions.find(a => a.type === 'govern');
   const restless = owned.filter(s => isRestless(game, s));
@@ -2950,7 +3119,7 @@ function renderHome() {
   const queued = (game.mandateQ || []).filter(q => q.h === h);
   const procCost = h === 'synod' ? 0 : RULES.MANDATE.proclaim;
   const taxHelp = { light: `−${owned.length} credits and +1 mandate a round.`, normal: 'No effect on credits or mandate.', heavy: `+${owned.length} credits and −1 mandate a round.` };
-  $('homeCard').innerHTML = `
+  return `<div class="stepintro">Keep your people behind you. Set taxes (free) and, if you need support, govern (1 order). A popular house gets more influence and tougher militia; a house in revolt loses an order.</div>
     <div class="objective" style="border-color:var(--line)"><h3>Mandate: ${m.mandate} of 10 (${lv[2]})</h3>
       <div class="meter"><i style="width:${m.mandate * 10}%;background:${mcolor(m.mandate)}"></i></div>
       <span class="muted">How firmly your people back you. ${lv[2]}: ${lv[3]}</span>
@@ -2974,28 +3143,76 @@ function renderHome() {
       <li>At the end, each mandate point above 5 is worth +${RULES.MANDATE.endBonus} prestige, and each point below 5 costs ${RULES.MANDATE.endBonus}.</li>
     </ul></details>`;
 }
+function reviewHtml() {
+  const h = human(), o = ui.orders, p = proj(), bound = boundTo(game, h), gate = game.lanes[game.dim];
+  const sec = (step, title, items) => `<section><div class="row between"><h3>${title}</h3><button class="btn small" data-goto="${step}">Change</button></div><ul>${items.length ? items.map(x => `<li>${x}</li>`).join('') : '<li class="muted">Nothing this round</li>'}</ul></section>`;
+  const council = [bound ? `Your votes go with ${hname(bound)} (council backing)` : `Vote <b>${o.vote.yes ? 'yes' : 'no'}</b> on ${esc(decreeTitle(game))}: ${voteWeight(game, h, o.vote)} votes${o.vote.inf ? `, ${o.vote.inf} influence spent` : ''}${o.vote.cr ? `, ${o.vote.cr} credits spent` : ''}`];
+  if (gate) council.push(`Send <b>${o.repair} fuel</b> to repair ${esc(gate.name)} (it needs ${game.need} from everyone)`);
+  if (o.motion) council.push(`Table a motion: ${DECREE_LABEL[o.motion.type]}${o.motion.target != null ? ' (' + (AIMED.includes(o.motion.type) ? hname(o.motion.target) : CLUSTER_NAMES[o.motion.target]) + ')' : ''}, backed by ${o.motion.inf} influence`);
+  if (o.writ != null && game.lanes[o.writ]) council.push(`Seal ${esc(game.lanes[o.writ].name)} next round (${RULES.GAMBIT.writ} influence)`);
+  const fleets = o.actions.filter(a => a.type === 'move' || (a.type === 'build' && a.hulls.length)).map(actionText);
+  const dip = o.actions.filter(a => a.type === 'send').map(a => actionText(a) + ' (1 order)');
+  for (const tr of game.treaties) if (tr.start === game.round && (tr.a === h || tr.b === h)) dip.push(`Sealed this round with ${hname(tr.a === h ? tr.b : tr.a)}: ${esc(termsText(tr.a, tr.b, tr.terms))}`);
+  for (const dd of o.diplo) dip.push(`<b style="color:${dd.type === 'betray' ? 'var(--bad)' : 'var(--gold)'}">${dd.type === 'betray' ? 'Betray' : 'Denounce'} your treaty with ${hname(dd.with)}</b>`);
+  if (o.whisper) dip.push(`Whisper campaign in ${hname(o.whisper)} (${RULES.GAMBIT.whisper} influence)`);
+  const tx = o.taxes || me().taxes || 'normal';
+  const home = [`${cap(tx)} taxes`, ...o.actions.filter(a => a.type === 'govern').map(a => actionText(a) + ' (1 order)')];
+  const warns = [];
+  if (p.c < 0 || p.f < 0 || p.i < 0) warns.push('Your choices cost more than you have. Change something before you can confirm.');
+  if (ordersLeft() > 0) warns.push(`You have ${ordersLeft()} unused order${ordersLeft() > 1 ? 's' : ''}. You could move a fleet, build ships, send a gift or govern.`);
+  if (game.inbox.length) warns.push(`Envoys from ${[...new Set(game.inbox.map(e => HOUSES[e.from].short))].join(', ')} are waiting. Unanswered, they leave and take it as a snub.`);
+  if (gate && !o.repair && !partnersOf(game, h, 'compact').length) warns.push(`You are sending no fuel to ${esc(gate.name)}. If too little arrives, it goes dark for good.`);
+  if (game.inbox.some(e => e.ultimatum != null)) warns.push('An ultimatum is waiting. Ignoring it counts as refusing.');
+  return `<div class="stepintro">Check your choices. When you confirm, everyone's orders resolve together and you get the round report.</div>
+    <div class="review">
+      ${warns.length ? `<section class="warns"><h3>Before you confirm</h3><ul>${warns.map(w => `<li>${w}</li>`).join('')}</ul></section>` : ''}
+      ${sec('council', '1 · Council', council)}
+      ${sec('fleets', '2 · Fleets', fleets)}
+      ${sec('diplomacy', '3 · Diplomacy', dip)}
+      ${sec('home', '4 · At home', home)}
+      <p class="muted">Orders used: ${o.actions.length} of ${ordersFor(game, h)}. After this round's spending you keep ${p.c} credits, ${p.f} fuel and ${p.i} influence, before next round's income.</p>
+    </div>`;
+}
+function renderSteps() {
+  if (!STEPS.some(s => s[0] === ui.step)) ui.step = 'council';
+  ui.seen.add(ui.step);
+  const i = STEPS.findIndex(s => s[0] === ui.step), p = proj(), bad = p.c < 0 || p.f < 0 || p.i < 0;
+  $('turnLbl').textContent = game.over ? 'Game over' : `Round ${game.round} of ${game.maxRounds} · ${ordersLeft()} order${ordersLeft() === 1 ? '' : 's'} left`;
+  $('steps').innerHTML = STEPS.map(([k, l], j) => `<button data-goto="${k}"${k === ui.step ? ' aria-current="step"' : ''} class="${ui.seen.has(k) && k !== ui.step ? 'done' : ''}"><b>${j + 1}</b>${l}${k === 'diplomacy' && game.inbox.length ? `<span class="badge" title="Envoys waiting">${game.inbox.length}</span>` : ''}</button>`).join('');
+  if (game.over) {
+    $('stepBody').innerHTML = `<div class="stepintro">The game is over. ${game.result.type === 'dark' ? 'The empire fell dark.' : hname(game.result.ranking[0].h) + ' won.'} Press New game to play again.</div>`;
+    $('stepNav').innerHTML = '<button class="btn primary" id="newFromSide">New game</button>';
+    return;
+  }
+  const notice = game.inbox.length && ui.step !== 'diplomacy' && ui.step !== 'review' ? `<div class="notice">Envoys are waiting for your answer in <button class="btn small" data-goto="diplomacy">3 · Diplomacy</button></div>` : '';
+  const body = { council: () => `<div class="stepintro">The council votes on one decree each round, and a jump gate is failing. Decide your vote, any motion for next round, and how much fuel to send secretly.</div>${councilHtml()}`,
+    fleets: fleetsHtml, diplomacy: diploHtml, home: () => homeHtml() + `<details><summary>While you're away</summary>${awayHtml()}</details>`, review: reviewHtml }[ui.step];
+  $('stepBody').innerHTML = notice + body();
+  const prev = STEPS[i - 1], next = STEPS[i + 1];
+  $('stepNav').innerHTML = `${prev ? `<button class="btn" data-goto="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>'}
+    ${next ? `<button class="btn primary" data-goto="${next[0]}">Next: ${next[1]} ›</button>` : `<button class="btn primary" id="endTurn" ${bad ? 'disabled' : ''}>Confirm and end round ${game.round}</button>`}`;
+}
 function renderHint() {
   let t = '';
   if (game.over) t = 'The game is over. Press New game to play again.';
   else if (ui.mode === 'move') t = '<b>Move:</b> click a highlighted neighbouring system (green = you can afford the toll). Press Esc to cancel.';
-  else if (ui.sel == null) t = `Round ${game.round}: pick a system to see what's there. You have <b>${ordersLeft()} orders</b> left.`;
-  else t = `You have <b>${ordersLeft()} orders</b> left this round. When you're done, press End round.`;
+  else t = '<b>Map:</b> click a system for details. Scroll or use + and − to zoom; drag to look around when zoomed in.';
   $('hint').innerHTML = t;
 }
 function renderAll() {
   visCache = null;
   if (!game) return;
-  renderStatus(); renderRound(); renderSel(); renderOrders(); renderHome(); renderHouses(); renderAway(); renderYou(); renderHint();
+  renderStatus(); renderSteps(); renderSel(); renderBoard(); renderYou(); renderHint();
   if ($('diplo').open) renderDiplo();
   document.documentElement.style.setProperty('--accent', HOUSES[human()].pal.mid);
   document.documentElement.style.setProperty('--accent-light', HOUSES[human()].pal.light);
 }
 
 // ---------- While you're away ----------
-function renderAway() {
+function awayHtml() {
   const m = me(), so = m.standing || STANDING_DEFAULT, missed = m.missed || 0;
   const row = key => `<div class="row"><b>${STANDING[key].label}</b><div class="seg" role="group" aria-label="${STANDING[key].label}">${STANDING[key].opts.map(([v, l]) => `<button data-stand="${key}" data-v="${v}" aria-pressed="${so[key] === v}">${l}</button>`).join('')}</div></div><span class="muted">${STANDING[key].help[so[key]]}</span>`;
-  $('awayCard').innerHTML = `<p class="muted">Each round has a time window in the real game. Miss one and your standing orders apply: fleets hold, treaty payments continue, your gate repair goes out, and you vote with the majority. From the second missed round, a Concord steward runs your house with these settings. Stewards keep every treaty, never betray, table no motions and start no wars. At home they lower taxes when your people grow restless, and hold a festival or proclamation if things get worse.</p>
+  return `<p class="muted">Each round has a time window in the real game. Miss one and your standing orders apply: fleets hold, treaty payments continue, your gate repair goes out, and you vote with the majority. From the second missed round, a Concord steward runs your house with these settings. Stewards keep every treaty, never betray, table no motions and start no wars. At home they lower taxes when your people grow restless, and hold a festival or proclamation if things get worse.</p>
     ${missed ? `<p class="muted" style="color:#b9a6ff">You have missed ${missed} round${missed > 1 ? 's' : ''}${missed >= 2 ? ', so a steward is in charge' : ''}. End this round to take charge again.</p>` : ''}
     <div class="standing">${['stance', 'build', 'repair', 'envoys'].map(row).join('')}</div>
     <div class="row"><span class="muted">Try it:</span><button class="btn small" data-away="1">Miss 1 round</button><button class="btn small" data-away="3">Away 3 rounds</button><button class="btn small" data-away="5">Away 5 rounds</button></div>
@@ -3043,7 +3260,12 @@ function showAwayReport(lasts, before) {
   html += endHtml();
   $('reportBody').innerHTML = html;
   showReport.reps = reps;
+  // your battles first, then any others you could see
+  const me_ = human();
+  showReport.queue = reps.map((r, i) => i).sort((a, b) => (reps[b].a.house === me_ || reps[b].b.house === me_) - (reps[a].a.house === me_ || reps[a].b.house === me_));
   $('report').showModal();
+  $('reportBody').scrollTop = 0;
+  if (reps.length) playBattle(showReport.queue[0], true);
 }
 
 // ---------- Diplomacy dialog ----------
@@ -3143,17 +3365,50 @@ function renderDiplo() {
 $('diplo').addEventListener('close', () => { ui.confirmBetray = false; renderAll(); });
 
 // ---------- Input ----------
-function toMap(e) { const r = mapCv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+function toMap(e) { const r = mapCv.getBoundingClientRect(); return { x: view.x + (e.clientX - r.left) / r.width * W / view.z, y: view.y + (e.clientY - r.top) / r.height * H / view.z }; }
+const pickR = base => Math.max(5, base / view.z);
+const drag = { ptrs: new Map(), moved: false, start: null, pinch: null };
+mapCv.addEventListener('pointerdown', e => {
+  drag.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (drag.ptrs.size === 1) { drag.moved = false; drag.start = { x: e.clientX, y: e.clientY, vx: view.x, vy: view.y }; }
+  if (drag.ptrs.size === 2) { const [a, b] = [...drag.ptrs.values()]; drag.pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: view.z }; drag.moved = true; }
+  try { mapCv.setPointerCapture(e.pointerId); } catch (err) { /* capture is a nicety: dragging still works without it */ }
+});
+mapCv.addEventListener('pointermove', e => {
+  if (!drag.ptrs.has(e.pointerId)) return;
+  drag.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  const r = mapCv.getBoundingClientRect();
+  if (drag.ptrs.size >= 2 && drag.pinch) {
+    const [a, b] = [...drag.ptrs.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+    const mid = toMap({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+    zoomAt(drag.pinch.z * d / Math.max(1, drag.pinch.d), mid.x, mid.y); return;
+  }
+  const s = drag.start; if (!s) return;
+  const dx = e.clientX - s.x, dy = e.clientY - s.y;
+  if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+  if (view.z <= 1) return;   // nothing to pan at full view
+  drag.moved = true; mapCv.classList.add('grab');
+  view.x = s.vx - dx / r.width * W / view.z; view.y = s.vy - dy / r.height * H / view.z; clampView();
+});
+const endPtr = e => { drag.ptrs.delete(e.pointerId); if (drag.ptrs.size < 2) drag.pinch = null; if (!drag.ptrs.size) { drag.start = null; mapCv.classList.remove('grab'); } };
+mapCv.addEventListener('pointerup', endPtr);
+mapCv.addEventListener('pointercancel', endPtr);
+mapCv.addEventListener('wheel', e => {
+  if (!game) return;
+  e.preventDefault();
+  const p = toMap(e); zoomAt(view.z * (e.deltaY < 0 ? 1.25 : 0.8), p.x, p.y);
+}, { passive: false });
 function nearestSys(p, maxD) {
   let best = null, bd = maxD;
   for (const s of game.systems) { const d = Math.hypot(s.x - p.x, s.y - p.y); if (d < bd) { bd = d; best = s; } }
   return best;
 }
-mapCv.addEventListener('mousemove', e => { if (!game) return; const s = nearestSys(toMap(e), 11); ui.hover = s ? s.id : null; });
+mapCv.addEventListener('mousemove', e => { if (!game) return; const s = nearestSys(toMap(e), pickR(11)); ui.hover = s ? s.id : null; });
 mapCv.addEventListener('mouseleave', () => { ui.hover = null; });
 mapCv.addEventListener('click', e => {
+  if (drag.moved) { drag.moved = false; return; }   // that was a drag, not a click
   if (!game || ui.anim) return;
-  const s = nearestSys(toMap(e), 12);
+  const s = nearestSys(toMap(e), pickR(12));
   if (ui.mode === 'move' && ui.selFleet) {
     const f = game.fleets.find(x => x.id === ui.selFleet);
     if (s && f && neighbours(game, f.sys).includes(s.id)) {
@@ -3228,7 +3483,16 @@ document.addEventListener('click', e => {
   if (d.act === 'betrayConfirm') { ui.confirmBetray = false; ui.orders.diplo = ui.orders.diplo.filter(x => x.with !== ui.talk); ui.orders.diplo.push({ type: 'betray', with: ui.talk }); save(); renderAll(); return; }
   if (d.act === 'undiplo') { ui.orders.diplo = ui.orders.diplo.filter(x => x.with !== ui.talk); save(); renderAll(); return; }
   if (d.act === 'closeDiplo') { $('diplo').close(); return; }
-  if (d.fleet) { ui.selFleet = +d.fleet; ui.pick = null; ui.mode = null; renderAll(); return; }
+  if (d.fleet) { ui.selFleet = +d.fleet; const f = game.fleets.find(x => x.id === ui.selFleet); if (f) { ui.sel = f.sys; centreOn(f.sys); } ui.pick = null; ui.mode = null; ui.step = 'fleets'; renderAll(); return; }
+  if (d.yard) { ui.sel = +d.yard; centreOn(ui.sel); ui.mode = null; ui.step = 'fleets'; renderAll(); return; }
+  if (d.goto) { ui.step = d.goto; ui.mode = null; renderAll(); const top = $('h-turn'); if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: 'start' }); return; }
+  if (d.zoom) {
+    const c = ui.sel != null ? sysAt(ui.sel) : { x: view.x + W / view.z / 2, y: view.y + H / view.z / 2 };
+    if (d.zoom === 'fit') zoomAt(1, W / 2, H / 2);
+    else { const inView = c.x >= view.x && c.x <= view.x + W / view.z && c.y >= view.y && c.y <= view.y + H / view.z; const p = inView ? c : { x: view.x + W / view.z / 2, y: view.y + H / view.z / 2 }; zoomAt(view.z * (d.zoom === 'in' ? 1.5 : 1 / 1.5), p.x, p.y); }
+    return;
+  }
+  if (t.id === 'newFromSide') { openSetup(); return; }
   if (d.cell) {
     const f = game.fleets.find(x => x.id === ui.selFleet); if (!f) return;
     const i = +d.cell;
@@ -3279,7 +3543,7 @@ function endTurn() {
   const ord = JSON.parse(JSON.stringify(ui.orders));
   ord.actions = ord.actions.filter(a => a.type !== 'build' || a.hulls.length);
   const last = resolveRound(game, ord);
-  ui.orders = blankOrders(); ui.mode = null; ui.pick = null; ui.gift = null; ui.reply = null; ui.confirmBetray = false;
+  ui.orders = blankOrders(); ui.mode = null; ui.pick = null; ui.gift = null; ui.reply = null; ui.confirmBetray = false; ui.step = 'council'; ui.seen = new Set();
   if ($('diplo').open) $('diplo').close();
   visCache = null;
   const postVis = visibleSet(game, human());
@@ -3300,17 +3564,36 @@ function seesEvent(e, seen) {
   if (e.vis === 'sys') return e.sys != null && seen(e.sys);
   return e.vis.includes(human());
 }
+function battleResult(r) {
+  const h = human(), mineSide = r.a.house === h ? 0 : r.b.house === h ? 1 : -1;
+  return r.winner === -1 ? 'Stalemate' : mineSide < 0 ? `${hname(r.winner === 0 ? r.a.house : r.b.house)} won` : r.winner === mineSide ? 'Victory' : 'Defeat';
+}
+let replayToken = 0;
+function playBattle(i, auto) {
+  const reps = showReport.reps, r = reps && reps[i]; if (!r || !$('replayBox')) return;
+  const tok = ++replayToken, q = showReport.queue, pos = q.indexOf(i);
+  $('replayBox').hidden = false;
+  $('replayLbl').textContent = `Battle ${pos + 1} of ${q.length}: ${HOUSES[r.a.house].short} (left) vs ${HOUSES[r.b.house].short} (right) at ${sysAt(r.sys).name}`;
+  $('replayNext').hidden = pos >= q.length - 1;
+  document.querySelectorAll('#reportBody .bcard').forEach((c, j) => c.classList.toggle('playing', j === i));
+  startReplay(r, $('replayCv'), B => {
+    if (tok !== replayToken) return;
+    $('replayLbl').textContent += B.winner === r.winner ? ' · ' + battleResult(r) : ' · replay differs from the result';
+    if (auto && pos < q.length - 1) setTimeout(() => { if (tok === replayToken && $('report').open) playBattle(q[pos + 1], true); }, 1500);
+  });
+}
 function battlesHtml(reps) {
   const h = human();
-  let html = `<h3>Battles</h3><div class="replay" id="replayBox" hidden><div class="screen"><canvas id="replayCv" width="480" height="270" aria-label="Battle replay"></canvas></div><div class="row between"><span class="muted" id="replayLbl"></span><button class="btn small" id="replayStop">Close replay</button></div></div><div class="battles">`;
+  let html = `<h3>Battles</h3><div class="replay" id="replayBox" hidden><div class="screen"><canvas id="replayCv" width="480" height="270" aria-label="Battle replay"></canvas></div>
+    <div class="row between"><span class="muted" id="replayLbl"></span><span class="row"><span class="seg" role="group" aria-label="Replay speed">${[1, 2, 4].map(s => `<button data-rspeed="${s}" aria-pressed="${replay.speed === s}">${s}×</button>`).join('')}</span><button class="btn small" id="replayNext">Next battle ›</button><button class="btn small" id="replayStop">Stop</button></span></div></div><div class="battles">`;
   reps.forEach((r, i) => {
     const mineSide = r.a.house === h ? 0 : r.b.house === h ? 1 : -1;
-    const res = r.winner === -1 ? 'Stalemate' : mineSide < 0 ? `${hname(r.winner === 0 ? r.a.house : r.b.house)} won` : r.winner === mineSide ? 'Victory' : 'Defeat';
+    const res = battleResult(r);
     const cls = mineSide < 0 || r.winner === -1 ? '' : r.winner === mineSide ? 'win' : 'loss';
     const side = s => `<div>${'<span class="row">' + swatch(s.house) + '<b>' + HOUSES[s.house].short + '</b></span>'}<span class="muted">${esc(s.name)} · ${DOCTRINES[s.doctrine].name}</span>${icons(s.house, s.grid, s.after)}<span class="muted">${Math.round(100 * s.lost)}% lost</span></div>`;
     html += `<div class="bcard"><div class="row between"><b>${esc(sysAt(r.sys).name)}${r.round !== game.round - 1 ? ' <span class="muted">(round ' + r.round + ')</span>' : ''}</b><span class="outcome ${cls}">${res}</span></div>
       <div class="vs">${side(r.a)}<span class="outcome">vs</span>${side(r.b)}</div>
-      <div class="row"><button class="btn small" data-replay="${i}">▶ Watch replay</button><span class="muted">${r.t} s of battle</span></div></div>`;
+      <div class="row"><button class="btn small" data-replay="${i}">▶ Watch again</button><span class="muted">${r.t} s of battle</span></div></div>`;
   });
   return html + '</div>';
 }
@@ -3322,7 +3605,7 @@ function endHtml() {
   html += `<h3>Standings</h3><table><thead><tr><th>House</th><th>Prestige</th><th>Systems</th></tr></thead><tbody>${hs.map(k => `<tr><td><span class="who">${swatch(k)}${HOUSES[k].short}${k === h ? ' <span class="tag you">You</span>' : ''}</span></td><td>${game.houses[k].prestige}</td><td>${game.systems.filter(s => s.owner === k).length}</td></tr>`).join('')}</tbody></table>`;
   if (game.over) {
     if (game.result.type === 'dark') html += `<div class="decree" style="border-color:#ff4a6a"><b>The empire falls dark.</b><span class="muted">${RULES.DARK_LIMIT} gates have failed and the network collapses. Every house loses, whatever its prestige.</span></div>`;
-    else html += `<div class="decree" style="border-color:var(--good)"><b>${game.result.ranking[0].h === h ? 'You win!' : hname(game.result.ranking[0].h) + ' wins.'}</b><span class="muted">Final prestige, with secret objectives revealed:</span></div>
+    else html += `<div class="decree" style="border-color:var(--good)"><b>${game.result.ranking[0].h === h ? 'You win!' : hname(game.result.ranking[0].h) + ' wins.'}${game.result.type === 'ascend' ? ' Ascendancy in round ' + game.result.round + '.' : ''}</b><span class="muted">${game.result.type === 'ascend' ? (game.result.ranking[0].h === h ? 'You' : hname(game.result.ranking[0].h)) + ' ended the round with at least ' + Math.round((RULES.ASCEND.ratio - 1) * 100) + '% more prestige than every rival, so the game ends early. ' : ''}Final prestige, with secret objectives revealed:</span></div>
       <table><thead><tr><th>House</th><th style="text-align:left">Secret objective</th><th>Honour</th><th>Mandate</th><th>Prestige</th></tr></thead><tbody>${game.result.ranking.map(r => `<tr><td><span class="who">${swatch(r.h)}${HOUSES[r.h].short}</span></td><td style="text-align:left" class="muted">${esc(r.objective)} ${r.done ? '✓ +' + RULES.P.objective : '✗'}</td><td>${r.honour} (${signed(r.honourBonus)})</td><td>${r.mandate} (${signed(r.mandateBonus)})</td><td>${r.prestige}</td></tr>`).join('')}</tbody></table>`;
     html += `<div class="row"><button class="btn primary" id="reportNew">New game</button><button class="btn" id="reportClose">Look at the map</button></div>`;
   } else {
@@ -3344,30 +3627,31 @@ function showReport(last, seen) {
         ${h === 'nyx' ? `<span class="muted">Your spies saw: ${Object.entries(last.votes).map(([k, v]) => `${HOUSES[k].short} ${v.absent ? 'with the majority' : v.yes ? 'yes' : 'no'} (${v.w})`).join(', ')}</span>` : ''}</div>
     </div>`;
   const homeEv = evs.filter(e => e.kind === 'home' && Array.isArray(e.vis));
+  if (reps.length) html += battlesHtml(reps);
   if (homeEv.length || inc) html += `<div class="homebox"><h3>At home</h3>${homeEv.map(e => `<span>${esc(e.text)}</span>`).join('')}
     ${inc ? `<span class="muted">Income: +${inc.c} credits${inc.trade ? ` (${inc.trade} from trade)` : ''}${inc.tax ? ` (${inc.tax > 0 ? '+' : '−'}${Math.abs(inc.tax)} from taxes)` : ''}, +${inc.f} fuel, +${inc.i} influence. Holdings: +${inc.held * RULES.P.system} prestige for ${inc.held} systems${inc.restless ? `, ${inc.restless} of them restless and paying nothing yet` : ''}.</span>` : ''}</div>`;
-  if (reps.length) html += battlesHtml(reps);
   const rest = evs.filter(e => !homeEv.includes(e));
   if (rest.length) html += `<h3>What happened</h3><ul class="events">${rest.map(e => `<li class="${e.kind}">${esc(e.text)}</li>`).join('')}</ul>`;
   html += endHtml();
   $('reportBody').innerHTML = html;
   showReport.reps = reps;
+  // your battles first, then any others you could see
+  const me_ = human();
+  showReport.queue = reps.map((r, i) => i).sort((a, b) => (reps[b].a.house === me_ || reps[b].b.house === me_) - (reps[a].a.house === me_ || reps[a].b.house === me_));
   $('report').showModal();
+  $('reportBody').scrollTop = 0;
+  if (reps.length) playBattle(showReport.queue[0], true);
 }
 $('report').addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
-  if (t.dataset.replay != null) {
-    const r = showReport.reps[+t.dataset.replay];
-    $('replayBox').hidden = false;
-    $('replayLbl').textContent = `${HOUSES[r.a.house].short} (left) vs ${HOUSES[r.b.house].short} (right) at ${sysAt(r.sys).name}`;
-    startReplay(r, $('replayCv'), B => { $('replayLbl').textContent += B.winner === r.winner ? ' · replay complete' : ' · replay differs from the result'; });
-    $('replayBox').scrollIntoView({ block: 'nearest' });
-  }
-  if (t.id === 'replayStop') { stopReplay(); $('replayBox').hidden = true; }
+  if (t.dataset.replay != null) { playBattle(+t.dataset.replay, false); $('replayBox').scrollIntoView({ block: 'nearest' }); }
+  if (t.dataset.rspeed) { replay.speed = +t.dataset.rspeed; document.querySelectorAll('[data-rspeed]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.rspeed === replay.speed))); }
+  if (t.id === 'replayNext') { const q = showReport.queue, cur = [...document.querySelectorAll('#reportBody .bcard')].findIndex(c => c.classList.contains('playing')); const pos = q.indexOf(cur); if (pos >= 0 && pos < q.length - 1) playBattle(q[pos + 1], true); }
+  if (t.id === 'replayStop') { replayToken++; stopReplay(); $('replayBox').hidden = true; }
   if (t.id === 'reportClose') { stopReplay(); $('report').close(); }
   if (t.id === 'reportNew') { stopReplay(); $('report').close(); openSetup(); }
 });
-$('report').addEventListener('close', () => stopReplay());
+$('report').addEventListener('close', () => { replayToken++; stopReplay(); });
 
 // ---------- Setup ----------
 const setup = { house: 'varkas', n: 7, rounds: 20 };
@@ -3395,10 +3679,11 @@ $('setup').addEventListener('click', e => {
 });
 $('setup').addEventListener('cancel', e => { if (!game) e.preventDefault(); });
 function begin(g, orders, fresh) {
-  game = g; ui.orders = orders; ui.sel = game.houses[game.human].home; ui.mode = null; ui.pick = null; ui.gift = null; ui.anim = null;
+  game = g; ui.orders = orders; ui.sel = game.houses[game.human].home; ui.mode = null; ui.pick = null; ui.gift = null; ui.anim = null; ui.step = 'council'; ui.seen = new Set(); clusterLabels = null;
   const own = game.fleets.find(f => f.house === game.human && f.sys === ui.sel);
   ui.selFleet = own ? own.id : null;
-  mapBg = paintBackground(game.seed % 1000, 120);
+  mapBg = paintBackground(game.seed % 1000, 120, true);
+  view.z = 1; view.x = 0; view.y = 0;
   $('setup').close();
   save(); renderAll();
   if (fresh) briefing();
@@ -3406,12 +3691,11 @@ function begin(g, orders, fresh) {
 function briefing() {
   const h = human(), o = objectiveStatus(game, h);
   $('reportBody').innerHTML = `<h2 id="h-report">Round 1: ${HOUSES[h].name}</h2>
-    <p>Your home is <b>${esc(sysAt(me().home).name)}</b> in the ${CLUSTER_NAMES[sysAt(me().home).cluster]}, with one fleet. Each round you get <b>3 orders</b>: move a fleet one step, build ships at a system you own, or send resources to another house. Then press End round, and everyone's orders resolve together.</p>
+    <p>Your home is <b>${esc(sysAt(me().home).name)}</b> in the ${CLUSTER_NAMES[sysAt(me().home).cluster]}, with one fleet. ${PROFILE[h].style}</p>
     <div class="objective"><h3>Your secret objective (+${RULES.P.objective} prestige at the end)</h3><span>${o.text}</span></div>
-    <p class="muted">Watch the failing gate (amber). If ${RULES.DARK_LIMIT} gates go dark, everyone loses, so chip in fuel when you can. Repairs earn prestige too.</p>
-    <p class="muted">Other houses will send envoys. Press <b>Talk</b> next to a house to negotiate treaties: peace, trade, shared sight, repair compacts, council backing or tribute. Keeping your word builds honour, and breaking it is possible but costly.</p>
-    <p class="muted">Keep your people behind you. Your <b>mandate</b> (in the At home card) rises with victories, light taxes and festivals, and falls with defeats, lost systems, heavy taxes and wars your people don't believe in. A popular house has more influence and tougher militia; a house in revolt loses an order a round and its fresh conquests.</p>
-    <p class="muted">Your house: ${PROFILE[h].style} Its full strengths and weakness are in the Your house card.</p>
+    <p><b>Winning:</b> have the most prestige after round ${game.maxRounds}, or be <b>ascendant</b> first: from round ${ascendFrom(game)}, a house with ${Math.round((RULES.ASCEND.ratio - 1) * 100)}% more prestige than every rival wins at once. If ${RULES.DARK_LIMIT} gates go dark, everyone loses.</p>
+    <p><b>Each round</b>, the panel on the right walks you through five steps: <b>1 Council</b> (vote, motions, gate repair), <b>2 Fleets</b> (your 3 orders: move and build), <b>3 Diplomacy</b> (treaties, envoys, gifts), <b>4 At home</b> (taxes, festivals) and <b>5 Review</b>, where you check everything and confirm. Then everyone's orders resolve together and the round report plays back any battles.</p>
+    <p class="muted">The top bar separates what you spend (credits, fuel, influence) from how you are scored (prestige, plus honour and mandate, which add or subtract prestige at the end). The leaderboard under the map shows who is closest to winning.</p>
     <div class="row"><button class="btn primary" id="reportClose">Start planning</button><button class="btn" id="briefHow">How to play</button></div>`;
   $('report').showModal();
 }
