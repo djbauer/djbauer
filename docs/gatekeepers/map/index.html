@@ -313,7 +313,7 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
 <div class="wrap">
   <header class="top">
     <div>
-      <div class="eyebrow">Gatekeepers · strategic map prototype v0.1</div>
+      <div class="eyebrow">Gatekeepers · strategic map prototype v0.2</div>
       <h1>Star Map</h1>
     </div>
     <div class="row">
@@ -1554,15 +1554,18 @@ function aiPropose(g, x, r) {
   return null;
 }
 // End-of-round diplomacy: computer houses send envoys. Deals between computer houses are settled at once.
-function aiDiplomacy(g, log) {
+// opening: the pass before round 1. Nobody starts the game with a treaty or an ultimatum, so computer houses
+// only send envoys to players then (something to answer in the first turn).
+function aiDiplomacy(g, log, opening) {
   const r = rngFor(g, 'diplo');
   for (const x of shuffle(houseKeys(g).filter(h => g.houses[h].ai), r)) {
-    const u = aiUltimatum(g, x, r);
+    const u = opening ? null : aiUltimatum(g, x, r);
     if (u) deliverUltimatum(g, x, u.o, u.sid, log);
     if (r() > 0.3) continue;
     const p = aiPropose(g, x, r);
     if (!p) continue;
     if (g.houses[p.to].ai) {
+      if (opening) continue;
       const ans = aiEvaluate(g, p.to, x, p.terms);
       if (ans.accept) sealTreaty(g, x, p.to, p.terms, log);
       else if (ans.counter && termsValid(g, x, p.to, ans.counter).ok && aiValue(g, x, p.to, ans.counter).v >= 0) sealTreaty(g, x, p.to, ans.counter, log);
@@ -1867,7 +1870,7 @@ function newGame(opts) {
       : t === 'rival' ? { k: t, r: pick(keys.filter(x => x !== k), r) } : { k: t };
   }
   setupRound(g);
-  aiDiplomacy(g, turnLog(g));
+  aiDiplomacy(g, turnLog(g), true);
   return g;
 }
 
