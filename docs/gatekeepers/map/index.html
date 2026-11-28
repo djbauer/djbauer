@@ -959,7 +959,7 @@ const RULES = {
   LOANS: [6, 10, 14], LOAN_INTEREST: 0.5,
   FICKLE: 4,           // Kestrel crews grow restless after this many rounds without a raid or a victory
   // house twists that the balance tests tune (sim_houses.js can override any RULES value)
-  TWIST: { commerce: 3, spies: 2, roots: 8, faithEvery: 2, raid: 2, solenneRepair: 1.5, solennePrestige: 1, thin: 3, shipyard: 3, armourCost: 1, nyxHonour: 4, nyxSlots: 9, kestrelTaken: 0, yieldRatio: 2.2, pride: 2 },
+  TWIST: { commerce: 3, spies: 2, roots: 8, faithEvery: 3, faithPrestigeEvery: 2, raid: 2, solenneRepair: 1.5, solennePrestige: 1, thin: 3, shipyard: 3, armourCost: 1, nyxHonour: 4, nyxSlots: 9, kestrelTaken: 0, yieldRatio: 2.2, pride: 2 },
 };
 
 // How the computer players behave: aggression, generosity with gate repairs, and reluctance to betray.
@@ -1009,7 +1009,7 @@ const PROFILE = {
   synod:    { rate: { fleets: 2, diplomacy: 1, home: 3 }, style: 'Fanatics with loyal followers. Wins through holy war and pilgrimage.',
     fleets: ['Never retreats, and deals more damage as its ships fall.'],
     diplomacy: ['Censures against you always fail.', '<b>Crusade:</b> only you may table a Crusade motion. If it passes, every house gains a claim on the target, and victories over it earn double prestige next round.'],
-    home: ['<b>Faith:</b> +1 prestige every time a gate is saved, and +1 mandate for every second gate saved. Your sermons (proclamations) cost no influence.'],
+    home: ['<b>Faith:</b> +1 prestige for every second gate saved, and +1 mandate for every third. Your sermons (proclamations) cost no influence.'],
     weak: 'Zealots: sealing a treaty costs you 1 more influence.' },
 };
 // How each house's envoys sound when they accept or refuse.
@@ -2317,7 +2317,8 @@ function resolveRound(g, humanOrders) {
       say(gate.name + ' holds: repairs met the ' + g.need + ' fuel needed.', 'all', 'gate');
       const top = Math.max(...Object.values(contrib));
       for (const h of hs) { g.houses[h].prestige += Math.round(contrib[h] * RULES.P.repair * (h === 'solenne' ? RULES.TWIST.solennePrestige : 1)); if (top > 0 && contrib[h] === top) g.houses[h].prestige += RULES.P.topRepair; }
-      if (g.houses.synod) { const S = g.houses.synod; S.prestige += RULES.P.synod; S.faith = (S.faith || 0) + 1; if (S.faith % RULES.TWIST.faithEvery === 0) bump('synod', 1, 'pilgrims at ' + gate.name); }
+      // Synod faith: +1 prestige for every second saved gate, +1 mandate for every third
+      if (g.houses.synod) { const S = g.houses.synod; S.faith = (S.faith || 0) + 1; if ((S.faith - 1) % RULES.TWIST.faithPrestigeEvery === 0) S.prestige += RULES.P.synod; if (S.faith % RULES.TWIST.faithEvery === 0) bump('synod', 1, 'pilgrims at ' + gate.name); }
     } else {
       gate.lit = false; gate.darkRound = round; g.darkCount++;
       for (const o of new Set([g.systems[gate.a].owner, g.systems[gate.b].owner])) if (o) bump(o, -1, gate.name + ' went dark');
