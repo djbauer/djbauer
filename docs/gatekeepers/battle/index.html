@@ -29,9 +29,9 @@
 }
 * { box-sizing: border-box; }
 html, body { background: var(--bg); color: var(--fg); }
-body { font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.5; margin: 0; }
 .wrap {
-  max-width: 1080px; margin: 0 auto;
+  max-width: 1320px; margin: 0 auto;
   padding-block: 20px 48px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -67,7 +67,7 @@ h3 { font-family: var(--font-display); font-size: 12px; letter-spacing: .06em; t
 #banner span { display: block; text-align: center; }
 #banner small { display: block; font-size: clamp(10px, 2vw, 16px); letter-spacing: .1em; color: var(--fg); margin-top: 6px; }
 @keyframes pop { from { transform: scale(2.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.readout { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.readout { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; }
 .readout .side { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .swatch { width: 12px; height: 12px; border: 2px solid #050713; flex: none; }
 .clock { font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--muted); }
@@ -91,13 +91,45 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .seg button + button { border-left: 2px solid #050713; }
 .seg button[aria-pressed="true"] { background: var(--gold); color: #1a1205; }
 
-/* Panels */
-.panels { display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: 14px; align-items: start; }
-@media (max-width: 900px) { .panels { grid-template-columns: 1fr 1fr; } .panels .orders { grid-column: 1 / -1; order: -1; } }
-@media (max-width: 620px) { .panels { grid-template-columns: 1fr; } }
-.panel { background: var(--panel); border: 2px solid var(--line); padding: 14px; display: grid; gap: 12px; min-width: 0; }
-.panel p { margin: 0; }
-.muted { color: var(--muted); font-size: 13px; }
+/* Layout: battle screen and reports on the left, the guided orders panel on the right */
+header.top { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.lead { margin: 0; color: var(--muted); max-width: 80ch; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 18px; align-items: start; }
+@media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+.stagecol { display: grid; gap: 14px; min-width: 0; }
+.under { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+@media (max-width: 700px) { .under { grid-template-columns: 1fr; } }
+.panel, .card { background: var(--panel); border: 2px solid var(--line); padding: 14px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.card.hot { border-color: color-mix(in srgb, var(--accent) 60%, var(--line)); }
+.panel p, .card p { margin: 0; }
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.steps button { display: grid; justify-items: center; gap: 2px; padding: 7px 4px; background: var(--panel-2); border: 2px solid transparent; font-family: var(--font-display); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.steps button b { font-size: 15px; color: var(--fg); }
+.steps button.done b::after { content: " ✓"; color: var(--good); }
+.steps button[aria-current="step"] { border-color: var(--gold); color: var(--fg); background: #1d2756; }
+.stepintro { background: #0c1129; border-left: 4px solid var(--gold); padding: 9px 12px; font-size: 15px; }
+.stepbody { display: grid; gap: 14px; }
+.stepbody > [data-pane] { display: grid; gap: 14px; }
+.stepbody > [hidden] { display: none; }
+.summary ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.summary .warn { color: var(--gold); }
+.bigbtns { display: grid; gap: 8px; }
+.bigbtns .btn { width: 100%; padding: 13px 16px; font-size: 14px; }
+details summary { cursor: pointer; font-family: var(--font-display); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.sfxctl { display: inline-flex; gap: 8px; align-items: center; }
+.sfxctl input { width: 90px; accent-color: var(--gold); }
+@media (max-width: 420px) { .steps button { font-size: 9px; letter-spacing: 0; overflow: hidden; } }
+.btn.small { padding: 7px 11px; font-size: 12px; }
+dialog { background: var(--panel); color: var(--fg); border: 3px solid #050713; outline: 2px solid var(--line); padding: 0; width: 100%; max-width: min(1100px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: rgba(3, 5, 14, .75); }
+.dlg { padding: 20px 22px; display: grid; gap: 14px; }
+.howgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.howgrid section { background: var(--panel-2); border: 2px solid var(--line); padding: 12px 14px; }
+.howgrid h3 { color: var(--gold); margin-bottom: 6px; }
+.howgrid ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 15px; }
+.muted { color: var(--muted); font-size: 14px; }
 
 .houses { display: grid; gap: 6px; }
 .house {
@@ -107,7 +139,7 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .house:hover { border-color: var(--line); }
 .house[aria-pressed="true"] { border-color: var(--gold); background: #1d2756; }
 .house b { font-weight: 600; display: block; line-height: 1.2; }
-.house i { font-style: normal; color: var(--muted); font-size: 12px; }
+.house i { font-style: normal; color: var(--muted); font-size: 13px; }
 .house .swatch { width: 18px; height: 18px; }
 .housecard { border-left: 4px solid var(--accent); padding-left: 10px; display: grid; gap: 4px; }
 
@@ -116,19 +148,19 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .hullbtn.unique { background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 30%, var(--panel-2)), var(--panel-2)); }
 .hullbtn .tag { font-family: var(--font-display); font-size: 9px; letter-spacing: .06em; color: var(--accent-light); text-transform: uppercase; }
 .hullbtn {
-  display: grid; justify-items: center; gap: 2px; padding: 6px 4px; background: var(--panel-2); border: 2px solid transparent; font-size: 12px;
+  display: grid; justify-items: center; gap: 2px; padding: 6px 4px; background: var(--panel-2); border: 2px solid transparent; font-size: 13px;
 }
 .hullbtn[aria-pressed="true"] { border-color: var(--gold); background: #1d2756; }
 .hullbtn img { image-rendering: pixelated; height: 30px; width: auto; }
 .hullbtn .cost { font-family: var(--font-display); font-size: 10px; color: var(--gold); }
-.hullinfo { font-size: 13px; color: var(--muted); min-height: 2.9em; }
+.hullinfo { font-size: 14px; color: var(--muted); min-height: 3em; margin: 0; }
 
 .formation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .colhead { font-family: var(--font-display); font-size: 10px; letter-spacing: .08em; color: var(--muted); text-align: center; text-transform: uppercase; }
 .cell {
   aspect-ratio: 1.5; display: grid; place-items: center; align-content: center; gap: 2px;
   background: repeating-linear-gradient(45deg, #0d1229 0 6px, #0f152f 6px 12px);
-  border: 2px dashed var(--line); font-size: 11px; color: var(--muted); min-width: 0;
+  border: 2px dashed var(--line); font-size: 12px; color: var(--muted); min-width: 0;
 }
 .cell.filled { background: #141c3e; border-style: solid; color: var(--fg); }
 .cell:hover { border-color: var(--gold); }
@@ -139,116 +171,146 @@ button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .budget b { font-family: var(--font-display); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .budget.over b { color: var(--bad); animation: shake .3s steps(3); }
 @keyframes shake { 33% { transform: translateX(-3px); } 66% { transform: translateX(3px); } }
-.row { display: grid; gap: 6px; }
+
 .doctrines { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .doc { text-align: left; padding: 7px 9px; background: var(--panel-2); border: 2px solid transparent; display: grid; gap: 1px; }
 .doc[aria-pressed="true"] { border-color: var(--gold); background: #1d2756; }
-.doc b { font-family: var(--font-display); font-size: 11px; letter-spacing: .04em; font-weight: 400; }
-.doc span { font-size: 12px; color: var(--muted); line-height: 1.3; }
+.doc b { font-family: var(--font-display); font-size: 12px; letter-spacing: .04em; font-weight: 400; }
+.doc span { font-size: 13px; color: var(--muted); line-height: 1.35; }
 
 .intel { display: grid; gap: 8px; }
 .contacts { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: var(--panel-2); border: 1px solid var(--line); font-size: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; background: var(--panel-2); border: 1px solid var(--line); font-size: 13px; }
 .chip img { image-rendering: pixelated; height: 16px; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
 th, td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; }
 th:first-child, td:first-child { text-align: left; color: var(--muted); font-weight: 400; }
 thead th { font-family: var(--font-display); font-size: 10px; letter-spacing: .06em; color: var(--muted); font-weight: 400; }
 .outcome { font-family: var(--font-display); font-size: 14px; }
 .outcome.win { color: var(--good); } .outcome.loss { color: var(--bad); }
-ol.log { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 3px; font-size: 12px; max-height: 190px; overflow-y: auto; }
+ol.log { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 3px; font-size: 13px; max-height: 220px; overflow-y: auto; }
 ol.log li { display: grid; grid-template-columns: 38px 1fr; gap: 6px; }
 ol.log time { font-family: var(--font-display); font-size: 10px; color: var(--muted); padding-top: 2px; }
 
 .cheats { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
-.cheat { background: var(--panel); border: 2px solid var(--line); padding: 10px 12px; font-size: 13px; display: grid; gap: 2px; }
+.cheat { background: var(--panel-2); border: 2px solid var(--line); padding: 10px 12px; font-size: 14px; display: grid; gap: 2px; }
 .cheat b { font-family: var(--font-display); font-size: 11px; font-weight: 400; color: var(--gold); letter-spacing: .04em; }
-footer { color: var(--muted); font-size: 12px; }
+footer { color: var(--muted); font-size: 13px; }
 @media (prefers-reduced-motion: reduce) { #banner, .budget.over b { animation: none; } }
 </style>
 
 <div class="wrap">
-  <header>
-    <div class="eyebrow">Gatekeepers · battle prototype v0.1</div>
-    <h1>Fleet Battle</h1>
-    <p>Set your fleet's orders, then watch it fight on its own. This is how battles would work in the real game: you set orders when it suits you, and the battle plays out during the overnight resolution. You can only see the enemy's silhouettes until you've fought them once. After that, change your orders and press Rematch to try a counter.</p>
+  <header class="top">
+    <div>
+      <div class="eyebrow">Gatekeepers · battle prototype v0.2</div>
+      <h1>Fleet Battle</h1>
+    </div>
+    <div class="row"><span class="sfxctl" id="sfxCtl"></span><button class="btn small" id="howBtn">How to play</button></div>
   </header>
+  <p class="lead">Set your fleet's orders in four steps on the right, then watch it fight on its own. In the real game you set orders when it suits you and battles play out overnight. You only see the enemy's silhouettes until you have fought them once; after that, change your orders and rematch.</p>
 
-  <section class="stage" aria-label="Battle screen">
-    <div class="screen">
-      <canvas id="cv" width="480" height="270" aria-label="Animated pixel-art space battle"></canvas>
-      <div id="banner" hidden></div>
-    </div>
-    <div class="readout">
-      <div class="side"><span class="swatch" id="swA"></span><span id="lblA"></span></div>
-      <span class="clock" id="clock">0:00</span>
-      <div class="side"><span id="lblB"></span><span class="swatch" id="swB"></span></div>
-    </div>
-    <div class="controls">
-      <button class="btn primary" id="engage">Engage</button>
-      <button class="btn" id="rematch" disabled>Rematch</button>
-      <button class="btn" id="newfoe">New opponent</button>
-      <span class="spacer"></span>
-      <span class="muted">Speed</span>
-      <div class="seg" id="speed" role="group" aria-label="Playback speed">
-        <button aria-pressed="true" data-s="1">1×</button><button aria-pressed="false" data-s="2">2×</button><button aria-pressed="false" data-s="4">4×</button>
-      </div>
-    </div>
-  </section>
-
-  <div class="panels">
-    <section class="panel" aria-labelledby="h-house">
-      <h2 id="h-house">Your house</h2>
-      <div class="houses" id="houses"></div>
-      <div class="housecard" id="housecard"></div>
-    </section>
-
-    <section class="panel orders" aria-labelledby="h-orders">
-      <h2 id="h-orders">Fleet orders</h2>
-      <div class="row">
-        <h3>1 · Pick a hull, then click a slot</h3>
-        <div class="palette" id="palette"></div>
-        <p class="hullinfo" id="hullinfo"></p>
-      </div>
-      <div class="row">
-        <div class="formation">
-          <div class="colhead">Rear</div><div class="colhead">Line</div><div class="colhead">Vanguard ▸</div>
+  <div class="layout">
+    <section class="stagecol" aria-label="Battle">
+      <div class="stage">
+        <div class="screen">
+          <canvas id="cv" width="480" height="270" aria-label="Animated pixel-art space battle"></canvas>
+          <div id="banner" hidden></div>
         </div>
-        <div class="formation" id="formation"></div>
-        <div class="budget" id="budget"><div class="meter"><i id="meterfill"></i></div><b id="budgettxt"></b></div>
+        <div class="readout">
+          <div class="side"><span class="swatch" id="swA"></span><span id="lblA"></span></div>
+          <span class="clock" id="clock">0:00</span>
+          <div class="side"><span id="lblB"></span><span class="swatch" id="swB"></span></div>
+        </div>
+        <div class="controls">
+          <button class="btn primary" id="engage">Engage</button>
+          <button class="btn" id="rematch" disabled>Rematch</button>
+          <button class="btn" id="newfoe">New opponent</button>
+          <span class="spacer"></span>
+          <span class="muted">Speed</span>
+          <div class="seg" id="speed" role="group" aria-label="Playback speed">
+            <button aria-pressed="true" data-s="1">1×</button><button aria-pressed="false" data-s="2">2×</button><button aria-pressed="false" data-s="4">4×</button>
+          </div>
+        </div>
       </div>
-      <div class="row">
-        <h3>2 · Doctrine</h3>
-        <div class="doctrines" id="doctrines"></div>
-      </div>
-      <div class="row">
-        <h3>3 · Retreat when losses reach</h3>
-        <div class="seg" id="retreat" role="group" aria-label="Retreat threshold"></div>
+      <div class="under">
+        <section class="card" aria-labelledby="h-intel" id="intelpanel">
+          <h2 id="h-intel">Scouting report</h2>
+          <div class="intel" id="intel"></div>
+        </section>
+        <section class="card" aria-labelledby="h-recap">
+          <h2 id="h-recap">Battle report</h2>
+          <div class="intel" id="recap"></div>
+        </section>
       </div>
     </section>
 
-    <section class="panel" aria-labelledby="h-intel" id="intelpanel">
-      <h2 id="h-intel">Scouting report</h2>
-      <div class="intel" id="intel"></div>
-      <div class="intel" id="recap"></div>
-    </section>
+    <aside>
+      <section class="card hot" aria-labelledby="h-orders">
+        <div class="row between"><h2 id="h-orders">Your orders</h2><span class="muted" id="ordLbl"></span></div>
+        <nav class="steps" id="steps" aria-label="Steps"></nav>
+        <div class="stepbody">
+          <div data-pane="house">
+            <div class="stepintro">Pick your house. Each fights differently and has one ship nobody else can build.</div>
+            <div class="houses" id="houses"></div>
+            <div class="housecard" id="housecard"></div>
+          </div>
+          <div data-pane="formation" hidden>
+            <div class="stepintro">Pick a hull, then click a slot to place it. Ships in the vanguard (right-hand column) are shot first, so put fragile ships behind a screen.</div>
+            <div class="palette" id="palette"></div>
+            <p class="hullinfo" id="hullinfo"></p>
+            <div class="row" style="display:grid;gap:6px">
+              <div class="formation"><div class="colhead">Rear</div><div class="colhead">Line</div><div class="colhead">Vanguard ▸</div></div>
+              <div class="formation" id="formation"></div>
+              <div class="budget" id="budget"><div class="meter"><i id="meterfill"></i></div><b id="budgettxt"></b></div>
+              <p class="muted" id="budgetmsg"></p>
+            </div>
+            <details><summary>What beats what</summary><div class="cheats" id="cheats1" style="margin-top:8px"></div></details>
+          </div>
+          <div data-pane="doctrine" hidden>
+            <div class="stepintro">Doctrine is how your fleet fights. The retreat setting decides when it jumps out to save the ships that are left.</div>
+            <h3>Doctrine</h3>
+            <div class="doctrines" id="doctrines"></div>
+            <h3>Retreat when losses reach</h3>
+            <div class="seg" id="retreat" role="group" aria-label="Retreat threshold"></div>
+            <p class="muted">An early retreat saves ships for later rounds but gives up the system. Nobody is ever knocked out of the game.</p>
+          </div>
+          <div data-pane="engage" hidden>
+            <div class="stepintro">Check your orders against what you know of the enemy, then engage. The battle plays on the screen to the left.</div>
+            <div class="summary" id="summary"></div>
+            <div class="bigbtns"><button class="btn primary" id="engage2">Engage</button><button class="btn" id="rematch2" disabled>Rematch (same enemy, same dice)</button><button class="btn" id="newfoe2">New opponent</button></div>
+          </div>
+        </div>
+        <div class="row between" id="stepNav"></div>
+      </section>
+    </aside>
   </div>
-
-  <section aria-labelledby="h-counters" class="row">
-    <h2 id="h-counters">What beats what</h2>
-    <div class="cheats">
-      <div class="cheat"><b>Torpedoes</b>Destroyers wreck cruisers and carriers, but they're slow and corvette point defence can shoot them down.</div>
-      <div class="cheat"><b>Lances</b>Cruiser beams strip shields fast. Frigates and shielded ships suffer.</div>
-      <div class="cheat"><b>Railguns</b>Frigate slugs ignore armour. Good against Varkas and against cruisers once their shields drop.</div>
-      <div class="cheat"><b>Fighters</b>Carrier wings swarm slow, unscreened fleets. Corvettes shred them.</div>
-      <div class="cheat"><b>Formation</b>Ships at the front get shot first. Put fragile ships behind a screen.</div>
-      <div class="cheat"><b>House ships</b>Each house has one ship nobody else can build: Bastion, Warden, Q-ship, Lancer, Shade, Arkship or Penitent.</div>
-      <div class="cheat"><b>Retreat</b>Retreating ships spool their jump drives for a few seconds, then warp out. An early retreat saves ships for later rounds. Nobody is ever knocked out of the game.</div>
-    </div>
-  </section>
 
   <footer>Prototype for the Gatekeepers design draft. Every battle is a deterministic simulation: the same orders and the same seed always give the same result, so a server can run it once and every player watches the same replay. House abilities and house ships are first guesses at balance.</footer>
 </div>
+
+<dialog id="how" aria-labelledby="h-how"><div class="dlg">
+  <h2 id="h-how">How to play</h2>
+  <p class="lead">You set orders ahead of time; the battle then fights itself. The same orders and the same dice always give the same battle.</p>
+  <div class="howgrid">
+    <section><h3>1 · House</h3><ul>
+      <li>Each house has a battle ability and one ship nobody else can build.</li>
+      <li>Varkas is tough, Nyx sees enemy orders, the Synod never retreats, and so on.</li></ul></section>
+    <section><h3>2 · Formation</h3><ul>
+      <li>Nine slots: three lanes, each with rear, line and vanguard.</li>
+      <li>The vanguard is shot first. Screen fragile ships behind sturdy ones.</li>
+      <li>Every hull costs points, and your fleet has a points budget.</li></ul></section>
+    <section><h3>3 · Doctrine and retreat</h3><ul>
+      <li>Doctrine changes how ships fight (advance, hold, focus fire and so on).</li>
+      <li>Retreat: when your losses reach this share, the fleet jumps out.</li></ul></section>
+    <section><h3>4 · Engage</h3><ul>
+      <li>Watch the battle, read the report, then change your orders.</li>
+      <li><b>Rematch</b> keeps the enemy and the dice, so only your choices change the result.</li>
+      <li><b>New opponent</b> rolls a fresh enemy fleet you can't see yet.</li></ul></section>
+  </div>
+  <h3>What beats what</h3>
+  <div class="cheats" id="cheats2"></div>
+  <div class="row"><button class="btn primary" id="howClose">Got it</button></div>
+</div></dialog>
 
 <script>
 (() => {
@@ -411,7 +473,9 @@ const SPRITES = {
 // grid index = lane * 3 + column; column 0 rear, 1 line, 2 vanguard; lane 0 top .. 2 bottom
 const COLX = [44, 84, 124], LANEY = [84, 138, 192];
 let battle = null;
-const fx = { beams: [], shots: [], parts: [], shake: 0, noShake: false };
+const fx = { beams: [], shots: [], parts: [], shake: 0, noShake: false, sound: null };
+// Sound hook: the page sets fx.sound to play effects. Headless runs leave it null, so results never depend on it.
+function sfx(kind, x, arg) { if (fx.sound) fx.sound(kind, x, arg); }
 
 function budgetFor(houseKey) { return BUDGET + (HOUSES[houseKey].budget || 0); }
 function gridCost(grid) { return grid.reduce((s, h) => s + (h ? HULLS[h].cost : 0), 0); }
@@ -527,13 +591,13 @@ function damage(T, amt, type, src) {
   let toHull = amt - toSh;
   if (T.sh > 0) {
     const absorb = Math.min(T.sh, toSh * mult);
-    T.sh -= absorb; toSh -= absorb / mult; T.shFlash = 0.18;
+    T.sh -= absorb; toSh -= absorb / mult; T.shFlash = 0.18; sfx('shield', T.x);
   }
   toHull += toSh;
   if (toHull > 0.01) {
     const armor = type === 'rail' ? 0 : T.ar;
     toHull = Math.max(toHull * 0.3, toHull - armor);
-    T.hp -= toHull; T.hit = 0.07;
+    T.hp -= toHull; T.hit = 0.07; sfx('hit', T.x);
     for (let i = 0; i < 3; i++) fx.parts.push({ x: T.x, y: T.y, vx: (Math.random() - .5) * 60, vy: (Math.random() - .5) * 60, life: .25, max: .25, kind: 'spark' });
   }
   T.lastHit = B.t;
@@ -565,6 +629,7 @@ function explode(x, y, size, ship) {
   fx.parts.push({ x, y, vx: 0, vy: 0, life: .35 * size + .1, max: .35 * size + .1, kind: 'ring', r: 6 * size });
   fx.parts.push({ x, y, vx: 0, vy: 0, life: .08, max: .08, kind: 'flash', r: 4 + 3 * size });
   if (!fx.noShake) fx.shake = Math.max(fx.shake, size * 1.6);
+  sfx('boom', x, size);
 }
 
 function fire(s) {
@@ -573,7 +638,7 @@ function fire(s) {
   let mul = (DOCTRINES[side.doctrine].dmg || 1) * zeal(side);
   if (s.disguised) {
     s.disguised = false; mul *= 3;
-    if (!side.unmasked) { side.unmasked = true; logEvent(HOUSES[s.house].short + ' Q-ships drop their convoy disguise'); }
+    if (!side.unmasked) { side.unmasked = true; logEvent(HOUSES[s.house].short + ' Q-ships drop their convoy disguise'); sfx('unmask', s.x); }
     fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .35, max: .35, kind: 'ring', r: 12, col: HOUSES[s.house].pal.light });
   }
   const nose = { x: s.x + dir * (s.w / 2 - 1), y: s.y };
@@ -582,18 +647,21 @@ function fire(s) {
     const hit = R() < hitChance(s, T, w);
     const off = hit ? 0 : (R() - .5) * 18;
     fx.beams.push({ x1: nose.x, y1: nose.y, x2: T.x + off, y2: T.y + off * .6, life: w.type === 'lance' ? .28 : .08, max: w.type === 'lance' ? .28 : .08, kind: w.type, col: pal.light });
+    sfx(w.type, nose.x);
     if (hit) damage(T, w.dmg * mul, w.type, s);
   } else if (w.type === 'rail') {
     const hit = R() < hitChance(s, T, w);
     const off = hit ? 0 : (R() < .5 ? -1 : 1) * (8 + R() * 8);
+    sfx('rail', nose.x);
     fx.shots.push({ kind: 'rail', x: nose.x, y: nose.y, tx: T.x, ty: T.y + off, spd: w.spd, target: T, hit, dmg: w.dmg * mul, side: s.side, src: s, col: pal.light, life: 2 });
   } else if (w.type === 'torp') {
+    sfx('torp', nose.x);
     fx.shots.push({ kind: 'torp', x: nose.x, y: nose.y, vx: dir * 30, vy: (R() - .5) * 30, spd: w.spd, target: T, dmg: w.dmg * mul, side: s.side, src: s, col: pal.light, life: 6, alive: true });
     if (s.h.recloak) s.cloak = s.h.recloak;
   } else if (w.type === 'hangar') {
     const mine = B.ships.filter(f => f.fighter && f.parent === s && f.alive && !f.escaped).length;
     for (let i = 0; i < 2 && mine + i < w.max && (s.launched || 0) < w.stock; i++) {
-      s.launched = (s.launched || 0) + 1;
+      s.launched = (s.launched || 0) + 1; if (!i) sfx('launch', s.x);
       const f = makeShip('fighter', s.side, s.house, s.x + dir * 4, s.y + (i ? 5 : -5), i);
       f.parent = s; f.cd = .8; B.ships.push(f);
     }
@@ -602,7 +670,7 @@ function fire(s) {
 
 function ramHit(s) {
   const B = battle, T = s.target, mul = zeal(B.sides[s.side]);
-  logEvent(shipName(s) + ' rams ' + shipName(T));
+  logEvent(shipName(s) + ' rams ' + shipName(T)); sfx('ram', T.x);
   damage(T, s.h.wpn.dmg * mul, 'ram', s);
   for (const e of B.ships) if (e !== T && e.side !== s.side && e.alive && !e.escaped && dist(e, s) < 20) damage(e, s.h.wpn.dmg * 0.3 * mul, 'ram', s);
   s.hp = 0; kill(s, null, 'ram', true);
@@ -691,7 +759,7 @@ function step(dt) {
       side.retreating = true;
       let k = 0;
       for (const s of B.ships) if (s.side === i && s.alive && !s.escaped) s.jump = 2.5 + (k++ % 5) * 0.2;
-      logEvent(HOUSES[side.house].short + ' fleet spools jump drives to retreat');
+      logEvent(HOUSES[side.house].short + ' fleet spools jump drives to retreat'); sfx('retreat', i === 0 ? 60 : W - 60);
     }
   });
   for (const s of B.ships) {
@@ -709,6 +777,7 @@ function step(dt) {
       if (s.jump <= 0) {
         s.escaped = true;
         if (!s.fighter) side.escaped++;
+        sfx('warp', s.x);
         fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .4, max: .4, kind: 'warp', dir: s.side === 0 ? -1 : 1, col: HOUSES[s.house].pal.light });
         fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .1, max: .1, kind: 'flash', r: 3 });
         continue;
@@ -723,7 +792,7 @@ function step(dt) {
       if (s.cd <= 0) {
         let best = null, bf = 0.97;
         for (const o of B.ships) if (o.side === s.side && o !== s && o.alive && !o.escaped && !o.fighter && dist(s, o) <= s.h.wpn.range && o.hp / o.maxHp < bf) { bf = o.hp / o.maxHp; best = o; }
-        if (best) { best.hp = Math.min(best.maxHp, best.hp + s.h.wpn.dmg); s.cd = s.h.wpn.cd; fx.beams.push({ x1: s.x, y1: s.y, x2: best.x, y2: best.y, life: .3, max: .3, kind: 'repair', col: '#7fe0a0' }); }
+        if (best) { best.hp = Math.min(best.maxHp, best.hp + s.h.wpn.dmg); s.cd = s.h.wpn.cd; sfx('repair', s.x); fx.beams.push({ x1: s.x, y1: s.y, x2: best.x, y2: best.y, life: .3, max: .3, kind: 'repair', col: '#7fe0a0' }); }
       }
     } else if (s.h.ram) {
       if (s.target && dist(s, s.target) <= s.h.wpn.range) { ramHit(s); continue; }
@@ -737,7 +806,7 @@ function step(dt) {
         for (const p of fx.shots) if (p.kind === 'torp' && !p.dead && p.side !== s.side) { const d = dist(s, p); if (d < bd) { bd = d; best = p; isT = true; } }
         if (!best) for (const e of B.ships) if (e.fighter && targetable(e, s)) { const d = dist(s, e); if (d < bd) { bd = d; best = e; } }
         if (best) {
-          s.pdcd = isT ? 1.1 : .5;
+          s.pdcd = isT ? 1.1 : .5; sfx('pd', s.x);
           fx.beams.push({ x1: s.x, y1: s.y - 1, x2: best.x, y2: best.y, life: .06, max: .06, kind: 'pd', col: '#fff1a8' });
           if (isT) { if (B.R() < .4) { best.dead = true; explode(best.x, best.y, .35); } }
           else if (B.R() < .6) damage(best, 4, 'pulse', s);
@@ -761,6 +830,117 @@ function step(dt) {
 }
 // ==== SIM END ====
 
+// ==== SFX START: synthesized sound effects (Web Audio, no sound files). Shared by both prototypes: edit it in ../fleet-battle/index.html, then run strategic-map/sync_sim.js. ====
+// Every sound is built from oscillators and filtered noise, so there is nothing to download.
+// Browsers only allow sound after the first click or key press, so the audio starts then.
+const Sfx = (() => {
+  let ac = null, master = null, noiseBuf = null, voices = 0;
+  let muted = false, vol = 0.6;
+  try { muted = localStorage.getItem('gk-sfx-muted') === '1'; const v = parseFloat(localStorage.getItem('gk-sfx-vol')); if (v >= 0 && v <= 1) vol = v; } catch (e) { /* no storage: defaults */ }
+  const last = {};
+  function init() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try {
+      ac = new AC();
+      const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5; comp.connect(ac.destination);
+      master = ac.createGain(); master.gain.value = muted ? 0 : vol; master.connect(comp);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    } catch (e) { ac = null; }
+  }
+  for (const ev of ['pointerdown', 'keydown']) window.addEventListener(ev, init, { passive: true });
+  const ready = () => ac && master && !muted && ac.state === 'running';
+  const gap = (key, ms) => { const t = performance.now(); if (last[key] && t - last[key] < ms) return false; last[key] = t; return true; };
+  function out(pan, gain, t0, dur, attack) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + (attack || 0.005));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    if (pan && ac.createStereoPanner) { const p = ac.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(p); p.connect(master); }
+    else g.connect(master);
+    return g;
+  }
+  function track(node, t1) { voices++; node.onended = () => voices--; node.stop(t1); }
+  function tone(o) {
+    const t0 = ac.currentTime + (o.delay || 0), dur = o.dur;
+    const osc = ac.createOscillator(); osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(o.f0, t0);
+    if (o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1, t0 + dur);
+    osc.connect(out(o.pan, o.gain, t0, dur, o.attack));
+    osc.start(t0); track(osc, t0 + dur + 0.02);
+  }
+  function noise(o) {
+    const t0 = ac.currentTime + (o.delay || 0), dur = o.dur;
+    const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+    const f = ac.createBiquadFilter(); f.type = o.filter || 'lowpass'; f.Q.value = o.q || 0.8;
+    f.frequency.setValueAtTime(o.f0, t0);
+    if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t0 + dur);
+    src.connect(f); f.connect(out(o.pan, o.gain, t0, dur, o.attack));
+    src.start(t0, Math.random() * 0.5); track(src, t0 + dur + 0.02);
+  }
+  const notes = (seq, type, gain, step, len) => seq.forEach((f, i) => tone({ type, f0: f, dur: len || step * 1.6, gain, delay: i * step }));
+  const S = {
+    // battle
+    pulse: p => gap('pulse', 45) && tone({ type: 'square', f0: 1500, f1: 420, dur: 0.07, gain: 0.035, pan: p }),
+    lance: p => gap('lance', 110) && (tone({ type: 'sawtooth', f0: 320, f1: 170, dur: 0.3, gain: 0.05, pan: p }), tone({ f0: 1100, f1: 760, dur: 0.26, gain: 0.025, pan: p })),
+    rail: p => gap('rail', 60) && (noise({ filter: 'highpass', f0: 3500, dur: 0.05, gain: 0.07, pan: p }), tone({ type: 'triangle', f0: 2600, f1: 900, dur: 0.1, gain: 0.035, pan: p })),
+    torp: p => gap('torp', 90) && noise({ filter: 'bandpass', f0: 350, f1: 1400, q: 2, dur: 0.4, gain: 0.08, pan: p, attack: 0.05 }),
+    launch: p => gap('launch', 200) && (tone({ type: 'square', f0: 520, f1: 880, dur: 0.06, gain: 0.025, pan: p }), tone({ type: 'square', f0: 620, f1: 980, dur: 0.06, gain: 0.025, pan: p, delay: 0.07 })),
+    pd: p => gap('pd', 50) && tone({ type: 'square', f0: 2800, f1: 2200, dur: 0.025, gain: 0.018, pan: p }),
+    shield: p => gap('shield', 70) && (tone({ f0: 1700, f1: 2500, dur: 0.14, gain: 0.03, pan: p }), tone({ f0: 2550, f1: 3100, dur: 0.1, gain: 0.015, pan: p })),
+    hit: p => gap('hit', 45) && noise({ filter: 'bandpass', f0: 1400, f1: 500, q: 1.5, dur: 0.07, gain: 0.07, pan: p }),
+    ram: p => gap('ram', 80) && (noise({ f0: 900, f1: 120, dur: 0.35, gain: 0.25, pan: p }), tone({ f0: 95, f1: 38, dur: 0.3, gain: 0.25, pan: p })),
+    boom: (p, size) => {
+      const s = Math.max(0.3, Math.min(2.4, size || 1));
+      if (!gap(s < 0.6 ? 'boomS' : 'boom', s < 0.6 ? 60 : 30)) return;
+      noise({ f0: Math.min(5000, 2600 / s), f1: 110, dur: 0.25 + 0.45 * s, gain: Math.min(0.32, 0.06 + 0.11 * s), pan: p });
+      if (s >= 0.6) tone({ f0: 120, f1: 32, dur: 0.2 + 0.25 * s, gain: Math.min(0.35, 0.12 * s), pan: p });
+    },
+    warp: p => gap('warp', 70) && (tone({ f0: 180, f1: 2400, dur: 0.35, gain: 0.04, pan: p }), noise({ filter: 'highpass', f0: 800, f1: 6000, dur: 0.3, gain: 0.03, pan: p })),
+    retreat: p => gap('retreat', 600) && [0, 0.22].forEach(d => { tone({ type: 'square', f0: 660, dur: 0.1, gain: 0.04, pan: p, delay: d }); tone({ type: 'square', f0: 440, dur: 0.1, gain: 0.04, pan: p, delay: d + 0.11 }); }),
+    unmask: p => gap('unmask', 300) && tone({ type: 'sawtooth', f0: 160, f1: 900, dur: 0.25, gain: 0.05, pan: p }),
+    repair: p => gap('repair', 250) && tone({ f0: 620, f1: 940, dur: 0.16, gain: 0.025, pan: p }),
+    // interface
+    click: () => gap('click', 30) && tone({ type: 'triangle', f0: 900, f1: 700, dur: 0.04, gain: 0.04 }),
+    select: () => gap('click', 30) && tone({ type: 'triangle', f0: 660, f1: 990, dur: 0.07, gain: 0.045 }),
+    place: () => gap('click', 30) && (tone({ type: 'square', f0: 330, dur: 0.05, gain: 0.03 }), tone({ type: 'triangle', f0: 990, dur: 0.06, gain: 0.03, delay: 0.04 })),
+    step: () => gap('step', 60) && (tone({ f0: 520, dur: 0.07, gain: 0.04 }), tone({ f0: 780, dur: 0.09, gain: 0.04, delay: 0.06 })),
+    error: () => gap('error', 150) && [0, 0.12].forEach(d => tone({ type: 'square', f0: 170, f1: 150, dur: 0.09, gain: 0.05, delay: d })),
+    confirm: () => notes([523, 659, 784, 1047], 'triangle', 0.05, 0.07),
+    engage: () => { noise({ filter: 'bandpass', f0: 200, f1: 2000, q: 1, dur: 0.6, gain: 0.08, attack: 0.2 }); notes([196, 262, 392], 'sawtooth', 0.03, 0.12, 0.3); },
+    endRound: () => { noise({ filter: 'bandpass', f0: 3000, f1: 200, q: 1.2, dur: 0.9, gain: 0.07, attack: 0.1 }); tone({ f0: 98, f1: 65, dur: 1, gain: 0.12, attack: 0.1 }); },
+    envoy: () => notes([880, 1175], 'sine', 0.05, 0.14, 0.5),
+    victory: () => notes([392, 523, 659, 784, 1047], 'square', 0.035, 0.11, 0.25),
+    defeat: () => notes([392, 311, 262, 196], 'triangle', 0.06, 0.18, 0.4),
+    stalemate: () => notes([440, 440, 392], 'triangle', 0.05, 0.16, 0.3),
+  };
+  return {
+    play(name, pan, arg) { if (!ready() || voices > 40 || !S[name]) return; try { S[name](pan || 0, arg); } catch (e) { /* audio is optional */ } },
+    // the battle sim calls this with a screen x position (0 to 480), used for left/right panning
+    battle(kind, x, arg) { if (ready() && voices <= 40 && S[kind]) try { S[kind](x == null ? 0 : (x / 240 - 1) * 0.7, arg); } catch (e) { /* optional */ } },
+    get muted() { return muted; },
+    get volume() { return vol; },
+    toggle() { muted = !muted; init(); if (master) master.gain.value = muted ? 0 : vol; try { localStorage.setItem('gk-sfx-muted', muted ? '1' : '0'); } catch (e) { /* fine */ } return muted; },
+    setVolume(v) { vol = Math.max(0, Math.min(1, v)); if (master && !muted) master.gain.value = vol; try { localStorage.setItem('gk-sfx-vol', String(vol)); } catch (e) { /* fine */ } },
+  };
+})();
+// A small sound control: a mute button and a volume slider. Put <span class="sfxctl" id="sfxCtl"></span> in the page.
+function mountSfxControl(el) {
+  if (!el) return;
+  const paint = () => {
+    el.innerHTML = `<button class="btn small" type="button" data-sfx="toggle" aria-pressed="${!Sfx.muted}" title="Sound effects">${Sfx.muted ? 'Sound: off' : 'Sound: on'}</button>`
+      + `<input type="range" min="0" max="100" step="5" value="${Math.round(Sfx.volume * 100)}" aria-label="Sound volume" data-sfx="vol" ${Sfx.muted ? 'disabled' : ''}>`;
+  };
+  paint();
+  el.addEventListener('click', e => { if (e.target.closest('[data-sfx="toggle"]')) { Sfx.toggle(); paint(); Sfx.play('select'); } });
+  el.addEventListener('input', e => { if (e.target.dataset.sfx === 'vol') Sfx.setVolume(e.target.value / 100); });
+  el.addEventListener('change', e => { if (e.target.dataset.sfx === 'vol') Sfx.play('boom', 0, 1); });
+}
+// ==== SFX END ====
+
+
+fx.sound = Sfx.battle;   // battle sounds on this page
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;
@@ -872,14 +1052,25 @@ const FIRE = ['#ffffff', '#fff1a8', '#ffc94a', '#ff8a2a', '#e8452c', '#8a2232', 
 const state = {
   house: 'varkas', brush: 'frigate', doctrine: 'advance', retreat: 0.5, speed: 1,
   grid: [null, 'destroyer', 'corvette', 'frigate', 'cruiser', 'frigate', null, 'frigate', 'corvette'],
-  enemy: null, seed: 0, revealed: false,
+  enemy: null, seed: 0, revealed: false, step: 'house', seen: new Set(['house']),
 };
+const STEPS = [['house', 'House'], ['formation', 'Formation'], ['doctrine', 'Doctrine'], ['engage', 'Engage']];
+const CHEATS = [
+  ['Torpedoes', "Destroyers wreck cruisers and carriers, but they're slow and corvette point defence can shoot them down."],
+  ['Lances', 'Cruiser beams strip shields fast. Frigates and shielded ships suffer.'],
+  ['Railguns', 'Frigate slugs ignore armour. Good against Varkas and against cruisers once their shields drop.'],
+  ['Fighters', 'Carrier wings swarm slow, unscreened fleets. Corvettes shred them.'],
+  ['Formation', 'Ships at the front get shot first. Put fragile ships behind a screen.'],
+  ['House ships', "Each house has one ship nobody else can build: Bastion, Warden, Q-ship, Lancer, Shade, Arkship or Penitent."],
+  ['Retreat', 'Retreating ships spool their jump drives for a few seconds, then warp out. An early retreat saves ships for later rounds.'],
+];
 let preview = [];
 
 function startBattle() {
   newBattle({ house: state.house, doctrine: state.doctrine, retreat: state.retreat, grid: state.grid }, state.enemy, state.seed);
   hideBanner();
-  document.getElementById('recap').innerHTML = '';
+  document.getElementById('recap').innerHTML = '<p class="muted">Battle in progress…</p>';
+  Sfx.play('engage');
 }
 const fmt = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
 
@@ -1118,13 +1309,44 @@ function renderIntel() {
   $('swA').style.background = HOUSES[state.house].pal.mid;
   $('lblA').textContent = HOUSES[state.house].name + ' · ' + DOCTRINES[state.doctrine].name;
 }
+function renderSteps() {
+  state.seen.add(state.step);
+  const i = STEPS.findIndex(s => s[0] === state.step);
+  $('steps').innerHTML = STEPS.map(([k, l], j) => `<button data-goto="${k}"${k === state.step ? ' aria-current="step"' : ''} class="${state.seen.has(k) && k !== state.step ? 'done' : ''}"><b>${j + 1}</b>${l}</button>`).join('');
+  document.querySelectorAll('.stepbody > [data-pane]').forEach(p => { p.hidden = p.dataset.pane !== state.step; });
+  const prev = STEPS[i - 1], next = STEPS[i + 1];
+  $('stepNav').innerHTML = `${prev ? `<button class="btn" data-goto="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>'}${next ? `<button class="btn primary" data-goto="${next[0]}">Next: ${next[1]} ›</button>` : '<span></span>'}`;
+  const used = gridCost(state.grid), max = budgetFor(state.house);
+  $('ordLbl').textContent = `${used} of ${max} points used`;
+}
+function renderSummary() {
+  const H_ = HOUSES[state.house], ships = state.grid.filter(Boolean), counts = {};
+  ships.forEach(h => counts[h] = (counts[h] || 0) + 1);
+  const used = gridCost(state.grid), max = budgetFor(state.house), E = state.enemy, known = state.revealed || H_.intel;
+  const front = [2, 5, 8].filter(i => state.grid[i]).length, warns = [];
+  if (!ships.length) warns.push('Your fleet is empty. Place some ships in step 2.');
+  else if (max - used >= 4) warns.push(`You have ${max - used} unspent points. A corvette costs ${HULLS.corvette.cost}.`);
+  if (ships.length && !front) warns.push('Nothing in the vanguard column: your rear ships will be the ones shot first.');
+  $('summary').innerHTML = `<ul>
+      <li><b>${H_.name}</b>: ${esc(H_.combat)}</li>
+      <li><b>${ships.length} squadrons</b>, ${used} of ${max} points${ships.length ? ': ' + Object.entries(counts).map(([h, n]) => n + ' × ' + HULLS[h].name).join(', ') : ''}</li>
+      <li>Doctrine: <b>${DOCTRINES[state.doctrine].name}</b> · Retreat: <b>${(H_.noRetreat ? 1 : state.retreat) >= 1 ? 'never' : Math.round(state.retreat * 100) + '% losses'}</b></li>
+      <li>Enemy: <b>${HOUSES[E.house].name}</b>, ${known ? DOCTRINES[E.doctrine].name + ' doctrine (known)' : 'orders unknown'}</li>
+    </ul>${warns.map(w => `<p class="warn">${w}</p>`).join('')}`;
+  $('engage2').disabled = !ships.length || (battle && !battle.over);
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 function rebuildPreview() {
   preview = [...spawnFleet(state.grid, 0, state.house), ...spawnFleet(state.enemy.grid, 1, state.enemy.house)];
 }
 function ordersChanged() {
   if (battle) { battle = null; fx.beams.length = 0; fx.shots.length = 0; hideBanner(); }
-  rebuildPreview(); renderFormation(); renderIntel();
+  rebuildPreview(); renderFormation(); renderIntel(); renderSummary(); renderSteps();
   $('engage').disabled = gridCost(state.grid) === 0;
+  syncButtons();
+}
+function syncButtons() {
+  $('engage2').disabled = $('engage').disabled; $('rematch2').disabled = $('rematch').disabled;
 }
 function hideBanner() { $('banner').hidden = true; }
 
@@ -1134,6 +1356,7 @@ function showResult() {
   ban.hidden = false;
   ban.style.animation = 'none'; void ban.offsetWidth; ban.style.animation = '';
   ban.style.color = win ? '#7fe0a0' : loss ? '#ff6b6b' : '#ffd166';
+  Sfx.play(win ? 'victory' : loss ? 'defeat' : 'stalemate');
   ban.innerHTML = `<span>${win ? 'Victory' : loss ? 'Defeat' : 'Stalemate'}<small>${win ? 'You hold the system' : loss ? 'Survivors fall back' : 'Neither side gives ground'}</small></span>`;
   const rows = [0, 1].map(i => {
     const side = B.sides[i];
@@ -1154,33 +1377,42 @@ function showResult() {
     </tbody></table>
     <ol class="log">${B.log.map(e => `<li><time>${fmt(e.t)}</time><span>${e.text}</span></li>`).join('') || '<li><time></time><span>No ships were lost.</span></li>'}</ol>
     <p class="muted">The enemy's orders are now revealed above. Change yours and press Rematch: the enemy fleet and the dice stay the same, so only your choices change the result.</p>`;
-  renderIntel();
+  renderIntel(); renderSummary();
   $('rematch').disabled = false;
   $('engage').disabled = false;
+  syncButtons();
 }
 
 document.addEventListener('click', e => {
   const t = e.target.closest('button');
   if (!t) return;
-  if (t.matches('.house')) { state.house = t.dataset.k; state.grid = state.grid.map(h => h && HULLS[h].house && HULLS[h].house !== state.house ? null : h); if (state.brush && HULLS[state.brush].house) state.brush = UNIQUE[state.house]; if (HOUSES[state.house].noRetreat) state.retreat = 1; else if (state.retreat === 1) state.retreat = 0.5; trimToBudget(); setAccent(); renderHouses(); renderPalette(); renderDoctrines(); ordersChanged(); }
-  else if (t.matches('.hullbtn')) { state.brush = t.dataset.h; renderPalette(); }
+  if (t.matches('.house')) { Sfx.play('select'); state.house = t.dataset.k; state.grid = state.grid.map(h => h && HULLS[h].house && HULLS[h].house !== state.house ? null : h); if (state.brush && HULLS[state.brush].house) state.brush = UNIQUE[state.house]; if (HOUSES[state.house].noRetreat) state.retreat = 1; else if (state.retreat === 1) state.retreat = 0.5; trimToBudget(); setAccent(); renderHouses(); renderPalette(); renderDoctrines(); ordersChanged(); }
+  else if (t.matches('.hullbtn')) { state.brush = t.dataset.h; renderPalette(); Sfx.play('select'); }
+  else if (t.dataset.goto) { state.step = t.dataset.goto; renderSteps(); renderSummary(); Sfx.play('step'); }
+  else if (t.id === 'howBtn') { $('how').showModal(); Sfx.play('click'); }
+  else if (t.id === 'howClose') { $('how').close(); }
+  else if (t.id === 'engage2' || t.id === 'rematch2') { if (gridCost(state.grid) > 0) { startBattle(); $('engage').disabled = true; $('rematch').disabled = true; syncButtons(); renderSummary(); $('cv').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } }
+  else if (t.id === 'newfoe2') { newOpponent(); Sfx.play('select'); }
   else if (t.matches('.cell')) {
     const i = +t.dataset.i, cur = state.grid[i];
     let next = state.brush || null;
     if (next && cur === next) next = null;
     const delta = (next ? HULLS[next].cost : 0) - (cur ? HULLS[cur].cost : 0);
     if (gridCost(state.grid) + delta > budgetFor(state.house)) {
-      const b = $('budget'); b.classList.remove('over'); void b.offsetWidth; b.classList.add('over'); return;
+      const b = $('budget'); b.classList.remove('over'); void b.offsetWidth; b.classList.add('over');
+      $('budgetmsg').innerHTML = `<span style="color:var(--bad)">Not enough points: a ${HULLS[next].name} costs ${HULLS[next].cost}${cur ? ` (${HULLS[cur].cost} back for the ${HULLS[cur].name})` : ''}, and you have ${budgetFor(state.house) - gridCost(state.grid)} left.</span>`;
+      Sfx.play('error'); return;
     }
-    $('budget').classList.remove('over');
+    $('budget').classList.remove('over'); $('budgetmsg').textContent = '';
+    Sfx.play(next ? 'place' : 'click');
     state.grid[i] = next; ordersChanged();
     const btn = document.querySelector(`.cell[data-i="${i}"]`); if (btn) btn.focus();
   }
-  else if (t.matches('.doc')) { state.doctrine = t.dataset.d; renderDoctrines(); ordersChanged(); }
-  else if (t.closest('#retreat') && !t.disabled) { state.retreat = +t.dataset.r; renderDoctrines(); ordersChanged(); }
-  else if (t.closest('#speed')) { state.speed = +t.dataset.s; document.querySelectorAll('#speed button').forEach(b => b.setAttribute('aria-pressed', b === t)); }
-  else if (t.id === 'engage' || t.id === 'rematch') { if (gridCost(state.grid) > 0) { startBattle(); $('engage').disabled = true; $('rematch').disabled = true; } }
-  else if (t.id === 'newfoe') { newOpponent(); }
+  else if (t.matches('.doc')) { state.doctrine = t.dataset.d; renderDoctrines(); ordersChanged(); Sfx.play('select'); }
+  else if (t.closest('#retreat') && !t.disabled) { state.retreat = +t.dataset.r; renderDoctrines(); ordersChanged(); Sfx.play('select'); }
+  else if (t.closest('#speed')) { Sfx.play('click'); state.speed = +t.dataset.s; document.querySelectorAll('#speed button').forEach(b => b.setAttribute('aria-pressed', b === t)); }
+  else if (t.id === 'engage' || t.id === 'rematch') { if (gridCost(state.grid) > 0) { startBattle(); $('engage').disabled = true; $('rematch').disabled = true; syncButtons(); renderSummary(); } }
+  else if (t.id === 'newfoe') { newOpponent(); Sfx.play('select'); }
 });
 function trimToBudget() {
   const max = budgetFor(state.house);
@@ -1191,16 +1423,21 @@ function newOpponent() {
   state.enemy = makeEnemy(state.seed);
   state.revealed = false;
   battle = null; fx.beams.length = 0; fx.shots.length = 0; hideBanner();
-  $('recap').innerHTML = '';
+  $('recap').innerHTML = '<p class="muted">No battle yet. Press Engage to fight this opponent.</p>';
   $('rematch').disabled = true;
-  rebuildPreview(); renderIntel();
+  rebuildPreview(); renderIntel(); renderSummary();
   $('engage').disabled = gridCost(state.grid) === 0;
+  syncButtons();
 }
 
 // ---------- Boot ----------
 state.seed = 20261122;
 state.enemy = makeEnemy(state.seed);
-setAccent(); renderHouses(); renderPalette(); renderFormation(); renderDoctrines(); renderIntel(); rebuildPreview();
+setAccent(); renderHouses(); renderPalette(); renderFormation(); renderDoctrines(); renderIntel(); rebuildPreview(); renderSummary(); renderSteps();
+$('recap').innerHTML = '<p class="muted">No battle yet. Set your orders, then press Engage.</p>';
+const cheatHtml = CHEATS.map(([k, v]) => `<div class="cheat"><b>${k}</b>${v}</div>`).join('');
+$('cheats1').innerHTML = cheatHtml; $('cheats2').innerHTML = cheatHtml;
+mountSfxControl($('sfxCtl'));
 requestAnimationFrame(frame);
 })();
 </script>

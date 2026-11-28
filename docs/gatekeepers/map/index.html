@@ -68,8 +68,7 @@ b.v { font-variant-numeric: tabular-nums; }
 .under > .wide { grid-column: 1 / -1; }
 @media (max-width: 760px) { .under { grid-template-columns: 1fr; } }
 /* The turn: five steps, one at a time */
-.side { position: sticky; top: 12px; }
-@media (max-width: 1040px) { .side { position: static; } }
+/* The whole page scrolls as one: the turn panel is not pinned (a pinned, taller-than-screen column scrolled oddly) */
 .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
 .steps button { display: grid; justify-items: center; gap: 2px; padding: 6px 2px; background: var(--panel-2); border: 2px solid transparent; font-family: var(--font-display); font-size: 10px; letter-spacing: .03em; text-transform: uppercase; color: var(--muted); position: relative; }
 .steps button b { font-size: 15px; color: var(--fg); font-weight: 400; }
@@ -278,6 +277,35 @@ ul.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; fon
 ul.notes li span { font-family: var(--font-display); font-size: 10px; margin-right: 6px; }
 ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+.stat .inc { font-family: var(--font-display); font-size: 11px; color: var(--good); }
+.stat .inc.zero { color: var(--muted); }
+.stat .inc.neg { color: var(--bad); }
+.stat b.neg { color: var(--bad); }
+.income table { font-size: 14px; }
+.income td.amt { text-align: right; font-variant-numeric: tabular-nums; }
+.substeps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+.substeps button { padding: 7px 6px; background: var(--panel-2); border: 2px solid transparent; font-family: var(--font-display); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.substeps button[aria-pressed="true"] { border-color: var(--gold); color: var(--fg); background: #1d2756; }
+.substeps button .ok { color: var(--good); }
+.mvrow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--panel-2); border: 2px solid transparent; padding: 7px 9px; }
+.mvrow.active { border-color: var(--gold); }
+.mvrow img { image-rendering: pixelated; height: 22px; }
+.dests { display: grid; gap: 6px; margin: 2px 0 4px 20px; }
+.dest { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; text-align: left; padding: 7px 10px; background: #0c1129; border: 2px solid var(--line); }
+.dest:hover:not([disabled]) { border-color: var(--good); }
+.dest[disabled] { opacity: .55; cursor: not-allowed; }
+.dest small { color: var(--muted); font-size: 13px; }
+.motionhelp { display: grid; gap: 4px; background: #0c1129; border-left: 3px solid var(--line); padding: 8px 10px; font-size: 14px; }
+.motionhelp b { color: var(--gold); font-weight: 600; }
+.motions dt { font-weight: 600; margin-top: 8px; }
+.motions dd { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.pending { border: 2px dashed var(--gold); padding: 8px 10px; display: grid; gap: 4px; }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: min(560px, calc(100vw - 32px)); background: #2a1020; color: #ffd9d9; border: 2px solid var(--bad); padding: 10px 14px; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+#toast[hidden] { display: none; }
+.sfxctl { display: inline-flex; gap: 8px; align-items: center; }
+.sfxctl input { width: 90px; accent-color: var(--gold); }
+.income table { max-width: 460px; }
+@media (max-width: 420px) { .steps button { font-size: 9px; letter-spacing: 0; overflow: hidden; } }
 </style>
 
 <div class="wrap">
@@ -287,6 +315,7 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
       <h1>Star Map</h1>
     </div>
     <div class="row">
+      <span class="sfxctl" id="sfxCtl"></span>
       <button class="btn small" id="howBtn">How to play</button>
       <button class="btn small" id="newBtn">New game</button>
     </div>
@@ -313,6 +342,7 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
         <section class="card" aria-labelledby="h-board"><h2 id="h-board">Leaderboard</h2><div id="boardCard"></div></section>
         <section class="card" aria-labelledby="h-sel"><h2 id="h-sel">Selected system</h2><div id="selCard"></div></section>
         <section class="card wide" aria-labelledby="h-you"><h2 id="h-you">Your house</h2><div id="youCard"></div></section>
+        <section class="card wide" aria-labelledby="h-away"><h2 id="h-away">While you're away</h2><div id="awayCard"></div></section>
       </div>
     </section>
 
@@ -329,6 +359,7 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
   <footer>Prototype for the Gatekeepers design draft. The other houses are simple computer players. In the real game they would be your friends, and everyone's orders would resolve together once a day. Battles use exactly the same rules as the battle prototype, and the round report plays them back.</footer>
 </div>
 
+<div id="toast" role="alert" hidden></div>
 <dialog id="setup" aria-labelledby="h-setup"><div class="dlg" id="setupBody"></div></dialog>
 <dialog id="report" aria-labelledby="h-report"><div class="dlg" id="reportBody"></div></dialog>
 <dialog id="diplo" aria-labelledby="h-diplo"><div class="dlg" id="diploBody"></div></dialog>
@@ -347,10 +378,12 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
       <li>Secretly send fuel to the failing gate (amber). Too little and it goes dark for good.</li></ul></section>
     <section><h3>2 · Fleets</h3><ul>
       <li>You get <b>3 orders</b>: move a fleet one step, or build ships at a system you own.</li>
+      <li>Three parts: <b>Move</b>, <b>Build</b>, then <b>Formation</b> (free).</li>
       <li>Rival fleets in the same system fight automatically, using the formation and doctrine you set.</li>
       <li>Be the only fleet in a system at round's end to take it. Owned systems need 2+ squadrons (militia).</li></ul></section>
     <section><h3>3 · Diplomacy</h3><ul>
       <li>Press <b>Talk</b> to make treaties from clauses: peace, trade, shared sight, repairs, votes, tribute.</li>
+      <li>Your envoy leaves when you end the round. The answer (yes, no or a counter-offer) is in the round report.</li>
       <li>Treaties are public and enforced. Keeping them earns <b>honour</b>; betraying one costs dearly.</li>
       <li>Answer envoys before the round ends, or their houses take it as a snub.</li></ul></section>
     <section><h3>4 · At home</h3><ul>
@@ -369,7 +402,8 @@ ul.notes li .p { color: var(--good); } ul.notes li .n { color: var(--bad); }
     <li><b>Gate tolls:</b> crossing a gate costs fuel, paid to whoever holds the far side. Trade partners cross free.</li>
     <li><b>Fog of war:</b> you only see fleets in and next to your systems and fleets.</li>
     <li><b>Nobody is knocked out:</b> a house with no systems can build at the Concord capital.</li>
-    <li><b>Missing a round:</b> standing orders cover the first missed round; from the second, a Concord steward runs your house (settings in step 4, At home).</li>
+    <li><b>Missing a round:</b> standing orders cover the first missed round; from the second, a Concord steward runs your house (settings in "While you're away", under the map).</li>
+    <li><b>Income:</b> the top bar shows what each resource will gain next round; hover over it, or see Your house, for where it comes from. Fuel only comes from fuel worlds (blue) and tolls paid to you.</li>
     <li><b>The map:</b> scroll or use + and − to zoom, drag to move around, Fit to see everything.</li>
   </ul></details>
   <div class="row"><button class="btn primary" id="howClose">Got it</button></div>
@@ -536,7 +570,9 @@ const SPRITES = {
 // grid index = lane * 3 + column; column 0 rear, 1 line, 2 vanguard; lane 0 top .. 2 bottom
 const COLX = [44, 84, 124], LANEY = [84, 138, 192];
 let battle = null;
-const fx = { beams: [], shots: [], parts: [], shake: 0, noShake: false };
+const fx = { beams: [], shots: [], parts: [], shake: 0, noShake: false, sound: null };
+// Sound hook: the page sets fx.sound to play effects. Headless runs leave it null, so results never depend on it.
+function sfx(kind, x, arg) { if (fx.sound) fx.sound(kind, x, arg); }
 
 function budgetFor(houseKey) { return BUDGET + (HOUSES[houseKey].budget || 0); }
 function gridCost(grid) { return grid.reduce((s, h) => s + (h ? HULLS[h].cost : 0), 0); }
@@ -652,13 +688,13 @@ function damage(T, amt, type, src) {
   let toHull = amt - toSh;
   if (T.sh > 0) {
     const absorb = Math.min(T.sh, toSh * mult);
-    T.sh -= absorb; toSh -= absorb / mult; T.shFlash = 0.18;
+    T.sh -= absorb; toSh -= absorb / mult; T.shFlash = 0.18; sfx('shield', T.x);
   }
   toHull += toSh;
   if (toHull > 0.01) {
     const armor = type === 'rail' ? 0 : T.ar;
     toHull = Math.max(toHull * 0.3, toHull - armor);
-    T.hp -= toHull; T.hit = 0.07;
+    T.hp -= toHull; T.hit = 0.07; sfx('hit', T.x);
     for (let i = 0; i < 3; i++) fx.parts.push({ x: T.x, y: T.y, vx: (Math.random() - .5) * 60, vy: (Math.random() - .5) * 60, life: .25, max: .25, kind: 'spark' });
   }
   T.lastHit = B.t;
@@ -690,6 +726,7 @@ function explode(x, y, size, ship) {
   fx.parts.push({ x, y, vx: 0, vy: 0, life: .35 * size + .1, max: .35 * size + .1, kind: 'ring', r: 6 * size });
   fx.parts.push({ x, y, vx: 0, vy: 0, life: .08, max: .08, kind: 'flash', r: 4 + 3 * size });
   if (!fx.noShake) fx.shake = Math.max(fx.shake, size * 1.6);
+  sfx('boom', x, size);
 }
 
 function fire(s) {
@@ -698,7 +735,7 @@ function fire(s) {
   let mul = (DOCTRINES[side.doctrine].dmg || 1) * zeal(side);
   if (s.disguised) {
     s.disguised = false; mul *= 3;
-    if (!side.unmasked) { side.unmasked = true; logEvent(HOUSES[s.house].short + ' Q-ships drop their convoy disguise'); }
+    if (!side.unmasked) { side.unmasked = true; logEvent(HOUSES[s.house].short + ' Q-ships drop their convoy disguise'); sfx('unmask', s.x); }
     fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .35, max: .35, kind: 'ring', r: 12, col: HOUSES[s.house].pal.light });
   }
   const nose = { x: s.x + dir * (s.w / 2 - 1), y: s.y };
@@ -707,18 +744,21 @@ function fire(s) {
     const hit = R() < hitChance(s, T, w);
     const off = hit ? 0 : (R() - .5) * 18;
     fx.beams.push({ x1: nose.x, y1: nose.y, x2: T.x + off, y2: T.y + off * .6, life: w.type === 'lance' ? .28 : .08, max: w.type === 'lance' ? .28 : .08, kind: w.type, col: pal.light });
+    sfx(w.type, nose.x);
     if (hit) damage(T, w.dmg * mul, w.type, s);
   } else if (w.type === 'rail') {
     const hit = R() < hitChance(s, T, w);
     const off = hit ? 0 : (R() < .5 ? -1 : 1) * (8 + R() * 8);
+    sfx('rail', nose.x);
     fx.shots.push({ kind: 'rail', x: nose.x, y: nose.y, tx: T.x, ty: T.y + off, spd: w.spd, target: T, hit, dmg: w.dmg * mul, side: s.side, src: s, col: pal.light, life: 2 });
   } else if (w.type === 'torp') {
+    sfx('torp', nose.x);
     fx.shots.push({ kind: 'torp', x: nose.x, y: nose.y, vx: dir * 30, vy: (R() - .5) * 30, spd: w.spd, target: T, dmg: w.dmg * mul, side: s.side, src: s, col: pal.light, life: 6, alive: true });
     if (s.h.recloak) s.cloak = s.h.recloak;
   } else if (w.type === 'hangar') {
     const mine = B.ships.filter(f => f.fighter && f.parent === s && f.alive && !f.escaped).length;
     for (let i = 0; i < 2 && mine + i < w.max && (s.launched || 0) < w.stock; i++) {
-      s.launched = (s.launched || 0) + 1;
+      s.launched = (s.launched || 0) + 1; if (!i) sfx('launch', s.x);
       const f = makeShip('fighter', s.side, s.house, s.x + dir * 4, s.y + (i ? 5 : -5), i);
       f.parent = s; f.cd = .8; B.ships.push(f);
     }
@@ -727,7 +767,7 @@ function fire(s) {
 
 function ramHit(s) {
   const B = battle, T = s.target, mul = zeal(B.sides[s.side]);
-  logEvent(shipName(s) + ' rams ' + shipName(T));
+  logEvent(shipName(s) + ' rams ' + shipName(T)); sfx('ram', T.x);
   damage(T, s.h.wpn.dmg * mul, 'ram', s);
   for (const e of B.ships) if (e !== T && e.side !== s.side && e.alive && !e.escaped && dist(e, s) < 20) damage(e, s.h.wpn.dmg * 0.3 * mul, 'ram', s);
   s.hp = 0; kill(s, null, 'ram', true);
@@ -816,7 +856,7 @@ function step(dt) {
       side.retreating = true;
       let k = 0;
       for (const s of B.ships) if (s.side === i && s.alive && !s.escaped) s.jump = 2.5 + (k++ % 5) * 0.2;
-      logEvent(HOUSES[side.house].short + ' fleet spools jump drives to retreat');
+      logEvent(HOUSES[side.house].short + ' fleet spools jump drives to retreat'); sfx('retreat', i === 0 ? 60 : W - 60);
     }
   });
   for (const s of B.ships) {
@@ -834,6 +874,7 @@ function step(dt) {
       if (s.jump <= 0) {
         s.escaped = true;
         if (!s.fighter) side.escaped++;
+        sfx('warp', s.x);
         fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .4, max: .4, kind: 'warp', dir: s.side === 0 ? -1 : 1, col: HOUSES[s.house].pal.light });
         fx.parts.push({ x: s.x, y: s.y, vx: 0, vy: 0, life: .1, max: .1, kind: 'flash', r: 3 });
         continue;
@@ -848,7 +889,7 @@ function step(dt) {
       if (s.cd <= 0) {
         let best = null, bf = 0.97;
         for (const o of B.ships) if (o.side === s.side && o !== s && o.alive && !o.escaped && !o.fighter && dist(s, o) <= s.h.wpn.range && o.hp / o.maxHp < bf) { bf = o.hp / o.maxHp; best = o; }
-        if (best) { best.hp = Math.min(best.maxHp, best.hp + s.h.wpn.dmg); s.cd = s.h.wpn.cd; fx.beams.push({ x1: s.x, y1: s.y, x2: best.x, y2: best.y, life: .3, max: .3, kind: 'repair', col: '#7fe0a0' }); }
+        if (best) { best.hp = Math.min(best.maxHp, best.hp + s.h.wpn.dmg); s.cd = s.h.wpn.cd; sfx('repair', s.x); fx.beams.push({ x1: s.x, y1: s.y, x2: best.x, y2: best.y, life: .3, max: .3, kind: 'repair', col: '#7fe0a0' }); }
       }
     } else if (s.h.ram) {
       if (s.target && dist(s, s.target) <= s.h.wpn.range) { ramHit(s); continue; }
@@ -862,7 +903,7 @@ function step(dt) {
         for (const p of fx.shots) if (p.kind === 'torp' && !p.dead && p.side !== s.side) { const d = dist(s, p); if (d < bd) { bd = d; best = p; isT = true; } }
         if (!best) for (const e of B.ships) if (e.fighter && targetable(e, s)) { const d = dist(s, e); if (d < bd) { bd = d; best = e; } }
         if (best) {
-          s.pdcd = isT ? 1.1 : .5;
+          s.pdcd = isT ? 1.1 : .5; sfx('pd', s.x);
           fx.beams.push({ x1: s.x, y1: s.y - 1, x2: best.x, y2: best.y, life: .06, max: .06, kind: 'pd', col: '#fff1a8' });
           if (isT) { if (B.R() < .4) { best.dead = true; explode(best.x, best.y, .35); } }
           else if (B.R() < .6) damage(best, 4, 'pulse', s);
@@ -1115,6 +1156,31 @@ const MANDATE_LEVELS = [
   [0, 'revolt', 'In revolt', 'As restless, and also: only 2 orders a round, your militia folds (1 squadron can take your systems), and systems you conquered in the last 3 rounds break away.'],
 ];
 const TAXES = ['light', 'normal', 'heavy'];
+// A house's income each round from its systems, house traits, taxes and mandate (before trade, tribute and loans).
+// parts lists where it comes from, for the page's income forecast.
+function baseIncome(g, h, taxes) {
+  const me = g.houses[h], owned = systemsOf(g, h), lv = mlevel(g, h), parts = [];
+  const add = (res, amt, why) => { if (amt) parts.push({ res, amt, why }); };
+  let sc = 0, sf = 0, si = 0, restless = 0;
+  for (const s of owned) {
+    if (isRestless(g, s)) { restless++; continue; } // newly conquered systems pay nothing yet
+    sc += s.yields.c + (h === 'ashgrove' && g.round - s.since >= RULES.TWIST.roots ? 1 : 0) - (h === 'kestrel' && s.id !== me.home ? RULES.TWIST.kestrelTaken : 0);
+    sf += s.yields.f; si += s.yields.i;
+  }
+  const n = owned.length - restless;
+  add('c', sc, n + ' system' + (n === 1 ? '' : 's')); add('f', sf, 'fuel worlds'); add('i', si, 'influence worlds');
+  add('i', 1, 'your seat at court'); // every house keeps a seat at court
+  if (h === 'meridian') add('c', RULES.TWIST.commerce, 'commerce');
+  if (h === 'nyx') add('i', RULES.TWIST.spies, 'spy network');
+  if (h === 'solenne') add('c', -Math.floor(owned.length / RULES.TWIST.thin), 'stretched thin');
+  const tax = taxes === 'heavy' ? owned.length : taxes === 'light' ? -owned.length : 0;
+  add('c', tax, taxes + ' taxes');
+  if (lv === 'restless' || lv === 'revolt') { add('c', -Math.floor(owned.length / 2), 'unrest'); add('i', -1, 'unrest'); }
+  if (lv === 'popular') add('i', 1, 'popular at home'); else if (lv === 'acclaimed') add('i', 2, 'acclaimed at home');
+  if (owned.length <= 1) add('c', 3, 'Concord stipend'); // comeback stipend: nobody is knocked out
+  const sum = r => parts.filter(p => p.res === r).reduce((a, p) => a + p.amt, 0);
+  return { c: Math.max(0, sum('c')), f: sum('f'), i: Math.max(0, sum('i')), tax, restless, parts };
+}
 function mandateLevel(m) { return MANDATE_LEVELS.find(l => m >= l[0]) || MANDATE_LEVELS[MANDATE_LEVELS.length - 1]; }
 const mlevel = (g, h) => mandateLevel(g.houses[h].mandate)[1];
 const mandateCap = h => h === 'nyx' ? RULES.MANDATE.nyxMax : RULES.MANDATE.max;
@@ -1380,7 +1446,34 @@ function aiEvaluate(g, x, y, terms) {
   }
   return { accept: false, v, text: hname(x) + ' declines: "' + (cons[0] ? cap(cons[0]) + '. ' : '') + voice.no + '"' };
 }
-// The player proposes a treaty to a computer house during their turn. It answers at once.
+// A proposal sent during a turn travels when the round resolves. A computer house answers then
+// (accept, counter-offer or decline); a counter-offer arrives as an envoy for the next turn. Another player
+// receives it as an envoy and answers during their next turn, exactly like the computer houses' envoys.
+function deliverProposal(g, from, p, log) {
+  const to = p.to, terms = p.terms;
+  if (!g.houses[to] || !g.houses[from] || to === from) return;
+  const deal = termsText(from, to, terms, true) + ' for ' + terms.rounds + ' rounds';
+  const v = termsValid(g, from, to, terms);
+  if (!v.ok) { log('Your envoy to ' + hname(to) + ' turned back: ' + v.why + '.', [from], 'reply'); return; }
+  if (!g.houses[to].ai) {
+    g.inbox.push({ id: g.nextEnvoy++, from, to, terms, text: hname(from) + ' proposes ' + deal + '.', round: g.round });
+    log('An envoy from ' + hname(from) + ' has arrived with a proposal.', [to], 'envoy');
+    return;
+  }
+  const ans = aiEvaluate(g, to, from, terms);
+  if (g.human === from) dnote(g, to, 'You proposed ' + deal + '. ' + ans.text);
+  if (ans.accept) { sealTreaty(g, from, to, terms, log); log('Your envoy to ' + hname(to) + ': ' + ans.text + ' The treaty is in force from this round.', [from], 'reply'); return; }
+  if (ans.counter && termsValid(g, to, from, ans.counter).ok) {
+    g.inbox = g.inbox.filter(e => !(e.from === to && e.to === from));
+    g.inbox.push({ id: g.nextEnvoy++, from: to, to: from, terms: ans.counter, counter: true, round: g.round,
+      text: hname(to) + ' answers your proposal with a counter-offer. ' + ans.text });
+    log('Your envoy to ' + hname(to) + ' came back with a counter-offer. Answer it in step 3, Diplomacy.', [from], 'reply');
+    return;
+  }
+  remember(g, to, from, -0.3, null);
+  log('Your envoy to ' + hname(to) + ': ' + ans.text, [from], 'reply');
+}
+// Kept for tests and older tools: proposes and answers at once.
 function proposeTreaty(g, from, to, terms) {
   const R = rel(g, to, from);
   if (R.heard === g.round) return { result: 'rejected', text: hname(to) + ' will hear no more proposals from you until next round.' };
@@ -2230,22 +2323,8 @@ function resolveRound(g, humanOrders) {
   const income = {};
   for (const h of hs) {
     const me = g.houses[h], owned = systemsOf(g, h), lv = mlevel(g, h);
-    let c = 0, f = 0, i = 1, restless = 0; // +1 influence a round: every house keeps a seat at court
-    for (const s of owned) {
-      if (isRestless(g, s)) { restless++; continue; } // newly conquered systems pay nothing yet
-      c += s.yields.c + (h === 'ashgrove' && round - s.since >= RULES.TWIST.roots ? 1 : 0) - (h === 'kestrel' && s.id !== me.home ? RULES.TWIST.kestrelTaken : 0);
-      f += s.yields.f; i += s.yields.i;
-    }
-    if (h === 'meridian') c += RULES.TWIST.commerce;
-    if (h === 'nyx') i += RULES.TWIST.spies; // spy network
-    if (h === 'solenne') c -= Math.floor(owned.length / RULES.TWIST.thin);
-    const tax = me.taxes === 'heavy' ? owned.length : me.taxes === 'light' ? -owned.length : 0;
-    c += tax;
+    const { c, f, i, tax, restless } = baseIncome(g, h, me.taxes);
     if (me.taxes === 'heavy') bump(h, -1, 'heavy taxes'); else if (me.taxes === 'light') bump(h, 1, 'light taxes');
-    if (lv === 'restless' || lv === 'revolt') { c -= Math.floor(owned.length / 2); i -= 1; }
-    if (lv === 'popular') i += 1; else if (lv === 'acclaimed') i += 2;
-    if (owned.length <= 1) c += 3; // comeback stipend: nobody is knocked out
-    c = Math.max(0, c); i = Math.max(0, i);
     me.credits += c; me.fuel += f; me.influence += i;
     me.prestige += owned.length * RULES.P.system;
     income[h] = { c, f, i, held: owned.length, trade: 0, tax, restless, level: lv };
@@ -2367,6 +2446,12 @@ function resolveRound(g, humanOrders) {
       if (g.houses[to] && !(g.houses[to].missed >= 1)) remember(g, p.from, to, -1, 'you ignored our envoy');
     }
     g.inbox = g.inbox.filter(p => p.round >= g.round);
+    // envoys sent this round travel now, so their answers are in the round report
+    for (const h of hs) for (const p of orders[h].proposals || []) deliverProposal(g, h, p, say);
+    for (const h of hs) {
+      const u = orders[h].ultimatum;
+      if (u && g.houses[u.to] && ultimatumTargets(g, h, u.to).includes(u.sid) && g.houses[h].influence >= RULES.GAMBIT.ultimatum && g.houses[h].usedGambit !== g.round) deliverUltimatum(g, h, u.to, u.sid, say);
+    }
     aiDiplomacy(g, say);
   }
   return g.last;
@@ -2389,6 +2474,115 @@ function objectiveStatus(g, h) {
   return { text: O.text(o), prog: O.prog(g, h, o), goal: O.goal(o) };
 }
 // ==== GAME END ====
+
+// ==== SFX START: synthesized sound effects (Web Audio, no sound files). Shared by both prototypes: edit it in ../fleet-battle/index.html, then run strategic-map/sync_sim.js. ====
+// Every sound is built from oscillators and filtered noise, so there is nothing to download.
+// Browsers only allow sound after the first click or key press, so the audio starts then.
+const Sfx = (() => {
+  let ac = null, master = null, noiseBuf = null, voices = 0;
+  let muted = false, vol = 0.6;
+  try { muted = localStorage.getItem('gk-sfx-muted') === '1'; const v = parseFloat(localStorage.getItem('gk-sfx-vol')); if (v >= 0 && v <= 1) vol = v; } catch (e) { /* no storage: defaults */ }
+  const last = {};
+  function init() {
+    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try {
+      ac = new AC();
+      const comp = ac.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 5; comp.connect(ac.destination);
+      master = ac.createGain(); master.gain.value = muted ? 0 : vol; master.connect(comp);
+      noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    } catch (e) { ac = null; }
+  }
+  for (const ev of ['pointerdown', 'keydown']) window.addEventListener(ev, init, { passive: true });
+  const ready = () => ac && master && !muted && ac.state === 'running';
+  const gap = (key, ms) => { const t = performance.now(); if (last[key] && t - last[key] < ms) return false; last[key] = t; return true; };
+  function out(pan, gain, t0, dur, attack) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(gain, t0 + (attack || 0.005));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    if (pan && ac.createStereoPanner) { const p = ac.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(p); p.connect(master); }
+    else g.connect(master);
+    return g;
+  }
+  function track(node, t1) { voices++; node.onended = () => voices--; node.stop(t1); }
+  function tone(o) {
+    const t0 = ac.currentTime + (o.delay || 0), dur = o.dur;
+    const osc = ac.createOscillator(); osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(o.f0, t0);
+    if (o.f1) osc.frequency.exponentialRampToValueAtTime(o.f1, t0 + dur);
+    osc.connect(out(o.pan, o.gain, t0, dur, o.attack));
+    osc.start(t0); track(osc, t0 + dur + 0.02);
+  }
+  function noise(o) {
+    const t0 = ac.currentTime + (o.delay || 0), dur = o.dur;
+    const src = ac.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+    const f = ac.createBiquadFilter(); f.type = o.filter || 'lowpass'; f.Q.value = o.q || 0.8;
+    f.frequency.setValueAtTime(o.f0, t0);
+    if (o.f1) f.frequency.exponentialRampToValueAtTime(o.f1, t0 + dur);
+    src.connect(f); f.connect(out(o.pan, o.gain, t0, dur, o.attack));
+    src.start(t0, Math.random() * 0.5); track(src, t0 + dur + 0.02);
+  }
+  const notes = (seq, type, gain, step, len) => seq.forEach((f, i) => tone({ type, f0: f, dur: len || step * 1.6, gain, delay: i * step }));
+  const S = {
+    // battle
+    pulse: p => gap('pulse', 45) && tone({ type: 'square', f0: 1500, f1: 420, dur: 0.07, gain: 0.035, pan: p }),
+    lance: p => gap('lance', 110) && (tone({ type: 'sawtooth', f0: 320, f1: 170, dur: 0.3, gain: 0.05, pan: p }), tone({ f0: 1100, f1: 760, dur: 0.26, gain: 0.025, pan: p })),
+    rail: p => gap('rail', 60) && (noise({ filter: 'highpass', f0: 3500, dur: 0.05, gain: 0.07, pan: p }), tone({ type: 'triangle', f0: 2600, f1: 900, dur: 0.1, gain: 0.035, pan: p })),
+    torp: p => gap('torp', 90) && noise({ filter: 'bandpass', f0: 350, f1: 1400, q: 2, dur: 0.4, gain: 0.08, pan: p, attack: 0.05 }),
+    launch: p => gap('launch', 200) && (tone({ type: 'square', f0: 520, f1: 880, dur: 0.06, gain: 0.025, pan: p }), tone({ type: 'square', f0: 620, f1: 980, dur: 0.06, gain: 0.025, pan: p, delay: 0.07 })),
+    pd: p => gap('pd', 50) && tone({ type: 'square', f0: 2800, f1: 2200, dur: 0.025, gain: 0.018, pan: p }),
+    shield: p => gap('shield', 70) && (tone({ f0: 1700, f1: 2500, dur: 0.14, gain: 0.03, pan: p }), tone({ f0: 2550, f1: 3100, dur: 0.1, gain: 0.015, pan: p })),
+    hit: p => gap('hit', 45) && noise({ filter: 'bandpass', f0: 1400, f1: 500, q: 1.5, dur: 0.07, gain: 0.07, pan: p }),
+    ram: p => gap('ram', 80) && (noise({ f0: 900, f1: 120, dur: 0.35, gain: 0.25, pan: p }), tone({ f0: 95, f1: 38, dur: 0.3, gain: 0.25, pan: p })),
+    boom: (p, size) => {
+      const s = Math.max(0.3, Math.min(2.4, size || 1));
+      if (!gap(s < 0.6 ? 'boomS' : 'boom', s < 0.6 ? 60 : 30)) return;
+      noise({ f0: Math.min(5000, 2600 / s), f1: 110, dur: 0.25 + 0.45 * s, gain: Math.min(0.32, 0.06 + 0.11 * s), pan: p });
+      if (s >= 0.6) tone({ f0: 120, f1: 32, dur: 0.2 + 0.25 * s, gain: Math.min(0.35, 0.12 * s), pan: p });
+    },
+    warp: p => gap('warp', 70) && (tone({ f0: 180, f1: 2400, dur: 0.35, gain: 0.04, pan: p }), noise({ filter: 'highpass', f0: 800, f1: 6000, dur: 0.3, gain: 0.03, pan: p })),
+    retreat: p => gap('retreat', 600) && [0, 0.22].forEach(d => { tone({ type: 'square', f0: 660, dur: 0.1, gain: 0.04, pan: p, delay: d }); tone({ type: 'square', f0: 440, dur: 0.1, gain: 0.04, pan: p, delay: d + 0.11 }); }),
+    unmask: p => gap('unmask', 300) && tone({ type: 'sawtooth', f0: 160, f1: 900, dur: 0.25, gain: 0.05, pan: p }),
+    repair: p => gap('repair', 250) && tone({ f0: 620, f1: 940, dur: 0.16, gain: 0.025, pan: p }),
+    // interface
+    click: () => gap('click', 30) && tone({ type: 'triangle', f0: 900, f1: 700, dur: 0.04, gain: 0.04 }),
+    select: () => gap('click', 30) && tone({ type: 'triangle', f0: 660, f1: 990, dur: 0.07, gain: 0.045 }),
+    place: () => gap('click', 30) && (tone({ type: 'square', f0: 330, dur: 0.05, gain: 0.03 }), tone({ type: 'triangle', f0: 990, dur: 0.06, gain: 0.03, delay: 0.04 })),
+    step: () => gap('step', 60) && (tone({ f0: 520, dur: 0.07, gain: 0.04 }), tone({ f0: 780, dur: 0.09, gain: 0.04, delay: 0.06 })),
+    error: () => gap('error', 150) && [0, 0.12].forEach(d => tone({ type: 'square', f0: 170, f1: 150, dur: 0.09, gain: 0.05, delay: d })),
+    confirm: () => notes([523, 659, 784, 1047], 'triangle', 0.05, 0.07),
+    engage: () => { noise({ filter: 'bandpass', f0: 200, f1: 2000, q: 1, dur: 0.6, gain: 0.08, attack: 0.2 }); notes([196, 262, 392], 'sawtooth', 0.03, 0.12, 0.3); },
+    endRound: () => { noise({ filter: 'bandpass', f0: 3000, f1: 200, q: 1.2, dur: 0.9, gain: 0.07, attack: 0.1 }); tone({ f0: 98, f1: 65, dur: 1, gain: 0.12, attack: 0.1 }); },
+    envoy: () => notes([880, 1175], 'sine', 0.05, 0.14, 0.5),
+    victory: () => notes([392, 523, 659, 784, 1047], 'square', 0.035, 0.11, 0.25),
+    defeat: () => notes([392, 311, 262, 196], 'triangle', 0.06, 0.18, 0.4),
+    stalemate: () => notes([440, 440, 392], 'triangle', 0.05, 0.16, 0.3),
+  };
+  return {
+    play(name, pan, arg) { if (!ready() || voices > 40 || !S[name]) return; try { S[name](pan || 0, arg); } catch (e) { /* audio is optional */ } },
+    // the battle sim calls this with a screen x position (0 to 480), used for left/right panning
+    battle(kind, x, arg) { if (ready() && voices <= 40 && S[kind]) try { S[kind](x == null ? 0 : (x / 240 - 1) * 0.7, arg); } catch (e) { /* optional */ } },
+    get muted() { return muted; },
+    get volume() { return vol; },
+    toggle() { muted = !muted; init(); if (master) master.gain.value = muted ? 0 : vol; try { localStorage.setItem('gk-sfx-muted', muted ? '1' : '0'); } catch (e) { /* fine */ } return muted; },
+    setVolume(v) { vol = Math.max(0, Math.min(1, v)); if (master && !muted) master.gain.value = vol; try { localStorage.setItem('gk-sfx-vol', String(vol)); } catch (e) { /* fine */ } },
+  };
+})();
+// A small sound control: a mute button and a volume slider. Put <span class="sfxctl" id="sfxCtl"></span> in the page.
+function mountSfxControl(el) {
+  if (!el) return;
+  const paint = () => {
+    el.innerHTML = `<button class="btn small" type="button" data-sfx="toggle" aria-pressed="${!Sfx.muted}" title="Sound effects">${Sfx.muted ? 'Sound: off' : 'Sound: on'}</button>`
+      + `<input type="range" min="0" max="100" step="5" value="${Math.round(Sfx.volume * 100)}" aria-label="Sound volume" data-sfx="vol" ${Sfx.muted ? 'disabled' : ''}>`;
+  };
+  paint();
+  el.addEventListener('click', e => { if (e.target.closest('[data-sfx="toggle"]')) { Sfx.toggle(); paint(); Sfx.play('select'); } });
+  el.addEventListener('input', e => { if (e.target.dataset.sfx === 'vol') Sfx.setVolume(e.target.value / 100); });
+  el.addEventListener('change', e => { if (e.target.dataset.sfx === 'vol') Sfx.play('boom', 0, 1); });
+}
+// ==== SFX END ====
 
 // ==== PAGE CODE: drawing and interface ====
 const $ = id => document.getElementById(id);
@@ -2578,7 +2772,38 @@ const blankDraft = () => ({ nap: false, trade: false, sight: false, compact: 0, 
 const DECREE_LABEL = { embargo: 'Embargo a house', censure: 'Censure a house', sanction: 'Sanction a house', bounty: 'War bounty', ceasefire: 'Ceasefire in a region', levy: 'Gate levy', openLanes: 'Open lanes', crusade: 'Crusade against a house' };
 const CLAUSE_SHORT = { nap: 'Peace', trade: 'Trade', sight: 'Sight', compact: 'Compact', backing: 'Backing', tribute: 'Tribute', loan: 'Loan' };
 // taxes: null keeps the current policy; whisper (Nyx) and writ (Solenne) are free gambits that cost influence
-const blankOrders = () => ({ actions: [], repair: 0, vote: { yes: true, inf: 0, cr: 0 }, diplo: [], motion: null, taxes: null, whisper: null, writ: null });
+const blankOrders = () => ({ actions: [], repair: 0, vote: { yes: true, inf: 0, cr: 0 }, diplo: [], motion: null, taxes: null, whisper: null, writ: null, proposals: [], ultimatum: null });
+// What each council motion does, why you might want it, and what happens if it passes
+const DECREE_HELP = {
+  embargo: { what: 'The target may not use jump gates next round. Fleets can still travel lanes without gates.', why: 'Stop a house that is about to attack you or grab a system across a gate, or cut a leader off from its fleets for a round.', pass: 'Its fleets are stuck behind gates for a round, its mandate drops 1, and every other house gains a claim on it (a just war) for 3 rounds.' },
+  censure: { what: () => 'The target loses ' + RULES.P.censure + ' prestige.', why: 'The cheapest way to pull a runaway leader back, before it reaches ascendancy.', pass: () => 'It loses ' + RULES.P.censure + ' prestige and 1 mandate, and every other house gains a claim on it for 3 rounds. (The Ember Synod cannot be censured.)' },
+  sanction: { what: () => 'The target loses ' + RULES.P.sanction + ' prestige, may not use jump gates next round, and its trade pacts pay nothing next round.', why: 'Punish a betrayer (the Concord tables this automatically after a betrayal), or hit a leader in its purse and its fleets at once.', pass: 'It loses prestige, gate travel and trade income for a round, and 1 mandate. Every other house gains a claim on it for 3 rounds.' },
+  bounty: { what: 'Next round, every battle victory earns double prestige.', why: 'You have the stronger fleets or are planning an attack, and want the win to count twice.', pass: 'Battles next round are worth double prestige to the winner, so expect everyone to be more aggressive.' },
+  ceasefire: { what: 'No battles in the chosen region next round.', why: 'Protect your systems there while your fleets are away, or halt a war you are losing.', pass: 'Fleets in that region cannot fight for a round, so nothing there can be taken.' },
+  levy: { what: 'Every house pays 2 credits now, and next round\'s failing gate needs 3 less fuel.', why: 'You are short of fuel and the gates are at risk; it spreads the cost of repairs over everyone.', pass: 'Everyone loses 2 credits, and the next gate is easier to save.' },
+  openLanes: { what: 'No gate tolls next round.', why: 'You need to move through gates other houses hold, or want to stop rivals earning tolls from you.', pass: 'Every gate is free to cross for a round, which hurts houses that earn from tolls.' },
+  crusade: { what: 'Every house gains a claim on the target, and victories over it earn double prestige next round.', why: 'The Ember Synod only: rally the whole empire against one house.', pass: 'Every house can attack the target without losing mandate, and beating it is worth double for a round.' },
+};
+const helpText = x => typeof x === 'function' ? x() : x;
+function motionHelpHtml(type) {
+  const d = DECREE_HELP[type]; if (!d) return '';
+  return `<div class="motionhelp"><span><b>What it does:</b> ${esc(helpText(d.what))}</span><span><b>Why table it:</b> ${esc(helpText(d.why))}</span><span><b>If it passes:</b> ${esc(helpText(d.pass))}</span></div>`;
+}
+// Short warnings for things you can't afford (with a sound)
+let toastTimer = 0;
+function toast(msg) {
+  const el = $('toast'); if (!el) return;
+  el.textContent = msg; el.hidden = false; Sfx.play('error');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 4200);
+}
+const RES_NAME = { c: 'credits', f: 'fuel', i: 'influence' };
+// true if spending `cost` ({ c, f, i }) on top of this round's plans leaves nothing negative; otherwise warns
+function affordable(cost, what) {
+  const p = proj(), short = Object.keys(cost).filter(k => cost[k] > 0 && p[k] - cost[k] < 0);
+  if (!short.length) return true;
+  toast(`Not enough ${short.map(k => RES_NAME[k]).join(' or ')} ${what ? 'to ' + what : ''}: ${short.map(k => `it costs ${cost[k]} ${RES_NAME[k]}, and you have ${Math.max(0, p[k])} left after this round's other plans`).join('; ')}.`);
+  return false;
+}
 const pips = n => `<span class="pips" role="img" aria-label="${n} of 3">${[1, 2, 3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
 const signed = n => (n < 0 ? '−' : '+') + Math.abs(n);
 const mcolor = m => m >= 7 ? 'var(--good)' : m >= 4 ? 'var(--gold)' : 'var(--bad)';
@@ -2612,7 +2837,32 @@ function proj() {
   if (ui.orders.motion) i -= ui.orders.motion.inf;
   if (ui.orders.whisper) i -= RULES.GAMBIT.whisper;
   if (ui.orders.writ != null) i -= RULES.GAMBIT.writ;
+  if (ui.orders.ultimatum) i -= RULES.GAMBIT.ultimatum;
+  for (const pr of ui.orders.proposals || []) {   // the seal fee (and anything you pay up front) is set aside in case they accept
+    i -= sealFee(game, human());
+    const gf = pr.terms.gift;
+    if (gf && gf.from === human()) { if (gf.res === 'credits') c -= gf.amt; if (gf.res === 'fuel') f -= gf.amt; if (gf.res === 'influence') i -= gf.amt; }
+  }
   return { c, f, i };
+}
+// Next round's income forecast: systems, traits, taxes and mandate, plus trade, tribute and loan payments
+function incomeForecast() {
+  const h = human(), taxes = ui.orders.taxes || me().taxes || 'normal', base = baseIncome(game, h, taxes), parts = base.parts.slice();
+  let trade = 0, n = 0;
+  for (const tr of game.treaties) if (tr.terms.trade && (tr.a === h || tr.b === h) && tr.end >= game.round) {
+    const o = tr.a === h ? tr.b : tr.a, smuggled = h === 'kestrel' || o === 'kestrel';
+    if (!smuggled && (game.effects.noTrade === h || game.effects.noTrade === o || !tradeRoute(game, h, o))) continue;
+    if (++n <= tradeCap(h)) trade += RULES.TRADE + (h === 'meridian' ? 1 : 0);
+  }
+  if (trade) parts.push({ res: 'c', amt: trade, why: 'trade pacts' });
+  for (const tr of game.treaties) if ((tr.a === h || tr.b === h) && tr.end >= game.round) {
+    const T = tr.terms.tribute;
+    if (T) parts.push({ res: T.res === 'fuel' ? 'f' : 'c', amt: T.from === h ? -T.amt : T.amt, why: 'tribute ' + (T.from === h ? 'to ' : 'from ') + hname(T.from === h ? (tr.a === h ? tr.b : tr.a) : T.from) });
+    const L = tr.terms.loan;
+    if (L) { const pay = loanPayment(L.amt, tr.terms.rounds); parts.push({ res: 'c', amt: L.from === h ? pay : -pay, why: L.from === h ? 'loan repayments to you' : 'loan repayment' }); }
+  }
+  const sum = r => parts.filter(p => p.res === r).reduce((a, p) => a + p.amt, 0);
+  return { c: base.c + sum('c') - base.parts.filter(p => p.res === 'c').reduce((a, p) => a + p.amt, 0), f: sum('f'), i: base.i + sum('i') - base.parts.filter(p => p.res === 'i').reduce((a, p) => a + p.amt, 0), parts };
 }
 const ordersLeft = () => ordersFor(game, human()) - ui.orders.actions.length;
 const moveOrderFor = fid => ui.orders.actions.find(a => a.type === 'move' && a.fleet === fid);
@@ -2823,8 +3073,9 @@ function startReplay(rep, canvas, onDone) {
   newBattle({ house: rep.a.house, doctrine: rep.a.doctrine, retreat: rep.a.retreat, grid: rep.a.grid },
             { house: rep.b.house, doctrine: rep.b.doctrine, retreat: rep.b.retreat, grid: rep.b.grid }, rep.seed);
   replay.active = true; replay.post = 0; replay.rep = rep; replay.done = onDone;
+  fx.sound = Sfx.battle;   // sounds only while a replay plays, never while the round resolves
 }
-function stopReplay() { replay.active = false; fx.noShake = true; fx.parts.length = 0; fx.beams.length = 0; fx.shots.length = 0; }
+function stopReplay() { replay.active = false; fx.sound = null; fx.noShake = true; fx.parts.length = 0; fx.beams.length = 0; fx.shots.length = 0; }
 function updateFx(dt) {
   for (const b of fx.beams) b.life -= dt;
   fx.beams = fx.beams.filter(b => b.life > 0);
@@ -2937,13 +3188,16 @@ function stepper(id, val) { return `<span class="stepper"><button data-step="${i
 function renderStatus() {
   const m = me(), p = proj();
   const rank = houseKeys(game).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige).indexOf(human()) + 1;
-  const ch = (now_, after) => after !== now_ ? `<b class="v">${now_}</b><small>→ ${after}</small>` : `<b class="v">${now_}</b>`;
+  const fc = incomeForecast();
+  const ch = (now_, after, inc) => (after !== now_ ? `<b class="v">${now_}</b><small>→ <b class="${after < 0 ? 'neg' : ''}" style="font-size:12px">${after}</b></small>` : `<b class="v">${now_}</b>`)
+    + `<span class="inc ${inc > 0 ? '' : inc < 0 ? 'neg' : 'zero'}">${inc >= 0 ? '+' : '−'}${Math.abs(inc)}/round</span>`;
+  const tip = r => (fc.parts.filter(x => x.res === r).map(x => `${x.amt > 0 ? '+' : '−'}${Math.abs(x.amt)} ${x.why}`).join(', ') || 'nothing') + ' (if you hold the same systems)';
   $('status').innerHTML = `
     <div class="sgroup"><span class="glabel">Round</span><div class="row"><span class="stat"><b>${game.round}</b><small>of ${game.maxRounds}</small></span><span class="stat">${swatch(human())}<b style="font-size:12px">${HOUSES[human()].short}</b></span></div></div>
     <div class="sgroup res"><span class="glabel">Resources · you spend these</span><div class="row">
-      <span class="stat" title="Credits: build ships, hold festivals, pay tribute and gifts. Your systems produce more each round."><i>Credits</i>${ch(m.credits, p.c)}</span>
-      <span class="stat" title="Fuel: gate tolls and gate repairs."><i>Fuel</i>${ch(m.fuel, p.f)}</span>
-      <span class="stat" title="Influence: extra votes, motions, sealing treaties, proclamations and gambits."><i>Influence</i>${ch(m.influence, p.i)}</span></div></div>
+      <span class="stat" title="Credits: build ships, hold festivals, pay tribute and gifts. Next round: ${tip('c')}."><i>Credits</i>${ch(m.credits, p.c, fc.c)}</span>
+      <span class="stat" title="Fuel: gate tolls and gate repairs. Next round: ${tip('f')}. Fuel comes only from fuel worlds (blue) and from tolls other houses pay you."><i>Fuel</i>${ch(m.fuel, p.f, fc.f)}</span>
+      <span class="stat" title="Influence: extra votes, motions, sealing treaties, proclamations and gambits. Next round: ${tip('i')}."><i>Influence</i>${ch(m.influence, p.i, fc.i)}</span></div></div>
     <div class="sgroup score"><span class="glabel">Standing · prestige wins the game</span><div class="row">
       <span class="stat" title="Prestige decides the winner. You are ranked #${rank}."><i>Prestige</i><b class="v">${m.prestige}</b><small>#${rank} of ${houseKeys(game).length}</small></span>
       <span class="stat" title="${honourLabel(m.honour)}: your reputation with other houses. Worth ±${RULES.HONOUR.endBonus} prestige per point from 5 at the end."><i>Honour</i><b class="v">${m.honour}</b><small>/10</small></span>
@@ -2986,6 +3240,7 @@ function councilHtml() {
       <h3>Council decree</h3>
       <b>${esc(decreeTitle(game))}</b>
       <span class="muted">${esc(decreeText(game))}</span>
+      <details><summary>Why vote yes or no?</summary>${motionHelpHtml(d.type)}</details>
       ${bound ? `<span class="muted">Your votes go with <b style="color:var(--fg)">${hname(bound)}</b> this round, under your council backing.</span>` : `
       <div class="row"><div class="seg" role="group" aria-label="Your vote"><button data-vote="1" aria-pressed="${v.yes}">Yes</button><button data-vote="0" aria-pressed="${!v.yes}">No</button></div>
         <span class="muted">Extra votes from influence:</span>${stepper('inf', v.inf)}</div>
@@ -2996,7 +3251,9 @@ function councilHtml() {
     <div class="decree" style="border-color:var(--line)">
       <h3>Table a motion for next round</h3>
       <div class="row"><select data-msel="type" aria-label="Motion"><option value="">No motion</option>${Object.keys(DECREES).filter(k => k !== 'crusade' || h === 'synod').map(k => `<option value="${k}"${m && m.type === k ? ' selected' : ''}>${DECREE_LABEL[k]}</option>`).join('')}</select>${targetSel}${m ? `<span class="muted">Influence</span>${stepper('motion', m.inf)}` : ''}</div>
-      <span class="muted">Whichever motion has the most influence behind it becomes next round's decree. Ties go to the more honourable house. The influence is spent either way, and motions are public.</span>
+      ${m ? motionHelpHtml(m.type) : ''}
+      <span class="muted">Whichever motion has the most influence behind it becomes next round's decree, and the council votes on it then. Ties go to the more honourable house. The influence is spent either way, and motions are public.</span>
+      <details><summary>What each motion does</summary><dl class="motions">${Object.keys(DECREES).filter(k => k !== 'crusade' || h === 'synod').map(k => `<dt>${DECREE_LABEL[k]}</dt><dd>${esc(helpText(DECREE_HELP[k].what))} <i>Why:</i> ${esc(helpText(DECREE_HELP[k].why))}</dd>`).join('')}</dl></details>
     </div>`;
 }
 function fleetCard(f) {
@@ -3010,8 +3267,7 @@ function fleetCard(f) {
     <p class="muted">Click two slots to swap them. Fleet settings are free and apply to every battle this fleet fights.</p>
     <div class="row"><span class="muted">Doctrine</span><select data-fset="doctrine">${Object.entries(DOCTRINES).map(([k, d]) => `<option value="${k}"${f.doctrine === k ? ' selected' : ''}>${d.name}</option>`).join('')}</select>
       <span class="muted">Retreat</span><select data-fset="retreat"${f.house === 'synod' ? ' disabled' : ''}>${RETREATS.map(([v, l]) => `<option value="${v}"${f.retreat === v ? ' selected' : ''}>${l}</option>`).join('')}</select></div>
-    <div class="row">${mv ? `<span class="muted">Moving to <b style="color:var(--gold)">${esc(sysAt(mv.to).name)}</b></span><button class="btn small" data-act="unmove">Cancel move</button>`
-      : `<button class="btn small${ui.mode === 'move' ? ' primary' : ''}" data-act="move" ${ordersLeft() <= 0 ? 'disabled' : ''}>${ui.mode === 'move' ? 'Pick a destination…' : 'Move (1 order)'}</button>`}</div>
+    ${mv ? `<span class="muted">Moving to <b style="color:var(--gold)">${esc(sysAt(mv.to).name)}</b> (part A)</span>` : ''}
   </div>`;
 }
 function renderSel() {
@@ -3037,8 +3293,9 @@ function buildHtml(sid) {
     const bo = buildOrderAt(s.id), cost = bo ? buildCost(h, bo.hulls) : 0, extra = x => buildCost(h, [...(bo ? bo.hulls : []), x]) - cost;
     if (s.capital) html += '<p class="muted">You hold no systems, so the Concord lets you commission ships here. Fleets at the capital are safe: no battles are allowed.</p>';
     html += `<h3>Build at ${esc(s.name)} ${bo ? '' : '(1 order)'}</h3>
-      <div class="palette">${hullsFor(h).map(x => `<button class="hullbtn${HULLS[x].house ? ' unique' : ''}" data-build="${x}" ${(!bo && ordersLeft() <= 0) || extra(x) > proj().c ? 'disabled' : ''} title="${esc(HULLS[x].role)}"><img alt="" src="${iconURL(h, x)}"><span>${HULLS[x].name}</span><span class="cost">${HULLS[x].cost} cr</span></button>`).join('')}</div>
+      <div class="palette">${hullsFor(h).map(x => `<button class="hullbtn${HULLS[x].house ? ' unique' : ''}" data-build="${x}" ${(!bo && ordersLeft() <= 0) || extra(x) > proj().c ? 'disabled' : ''} title="${esc(HULLS[x].role)}${extra(x) > proj().c ? ' (not enough credits: ' + extra(x) + ' needed, ' + Math.max(0, proj().c) + ' left)' : (!bo && ordersLeft() <= 0) ? ' (no orders left)' : ''}"><img alt="" src="${iconURL(h, x)}"><span>${HULLS[x].name}</span><span class="cost">${HULLS[x].cost} cr</span></button>`).join('')}</div>
       ${bo ? `<div class="row between"><span>${icons(h, bo.hulls)}<span class="muted"> ${cost} credits</span></span><button class="btn small" data-act="unbuild">Clear</button></div>` : '<p class="muted">New squadrons join a fleet here (or form a new one) when the round resolves.</p>'}
+      <p class="muted">Credits left this round: <b style="color:var(--fg)">${Math.max(0, proj().c)}</b>. Greyed-out ships cost more than that.</p>
       ${h === 'meridian' ? `<p class="muted">Your shipyards take ${RULES.TWIST.shipyard} credits off every build order.</p>` : h === 'varkas' ? `<p class="muted">Your heavy armour adds ${RULES.TWIST.armourCost} credit to every build order.</p>` : ''}`;
   }
   return html;
@@ -3054,25 +3311,71 @@ function ordersHtml() {
   for (let i = ui.orders.actions.length; i < ordersFor(game, human()); i++) items.push(`<li class="empty"><span class="n">${i + 1}</span><span>Free order slot</span><span></span></li>`);
   return `${mlevel(game, human()) === 'revolt' ? '<p class="muted" style="color:var(--bad)">Your house is in revolt: you have only 2 orders this round.</p>' : ''}<ol class="orders">${items.join('')}</ol>`;
 }
+const FSUB = [['move', 'A · Move'], ['build', 'B · Build'], ['formation', 'C · Formation']];
+// The toll this fleet would pay to reach `to`, and whether this round's fuel covers it
+function moveCheck(f, to) {
+  const mv = canMove(game, f, to);
+  if (!mv.ok) return { ...mv, afford: false };
+  const old = moveOrderFor(f.id), refund = old ? (canMove(game, f, old.to).toll || 0) : 0;
+  return { ...mv, afford: mv.toll <= proj().f + refund, have: proj().f + refund };
+}
+function setMove(f, to) {
+  const mc = moveCheck(f, to);
+  if (!mc.ok) { toast(`${f.name} can't go to ${sysAt(to).name}: ${mc.why}.`); return false; }
+  if (!mc.afford) { toast(`Not enough fuel: the gate toll to ${sysAt(to).name} is ${mc.toll} fuel, and you have ${Math.max(0, mc.have)} left after this round's other plans.`); return false; }
+  const old = moveOrderFor(f.id);
+  if (old) old.to = to;
+  else if (ordersLeft() > 0) ui.orders.actions.push({ type: 'move', fleet: f.id, to });
+  else { toast('No orders left. Remove an order (✕ in the list) to free one.'); return false; }
+  ui.mode = null; Sfx.play('place'); save(); return true;
+}
+function destsHtml(f) {
+  return `<div class="dests">${neighbours(game, f.sys).map(n => {
+    const s = sysAt(n), mc = moveCheck(f, n), seen = vis().has(n);
+    const others = seen ? game.fleets.filter(x => x.sys === n && x.house !== human() && squads(x) > 0) : [];
+    const bits = [s.owner ? (s.owner === human() ? 'yours' : HOUSES[s.owner].short + (hostile(game, human(), s.owner) ? '' : ' (at peace)')) : s.capital ? 'Concord capital' : 'unclaimed',
+      mc.ok ? (mc.toll ? `toll ${mc.toll} fuel` : mc.gate ? 'gate, no toll' : 'open lane') : mc.why,
+      others.length ? `<span style="color:var(--bad)">${others.map(x => HOUSES[x.house].short).join(', ')} fleet here: battle</span>` : seen ? '' : 'out of sight'].filter(Boolean);
+    return `<button class="dest" data-moveto="${n}" ${mc.ok ? '' : 'disabled'}><span><b>${esc(s.name)}</b><br><small>${bits.join(' · ')}</small></span><small>${!mc.ok ? '' : mc.afford ? 'Go' : '<span style="color:var(--bad)">Not enough fuel</span>'}</small></button>`;
+  }).join('')}</div><p class="muted" style="margin-left:20px">Or click a system ringed in green on the map. <button class="btn small" data-act="move">Cancel</button></p>`;
+}
 function fleetsHtml() {
   const h = human(), mine = game.fleets.filter(f => f.house === h && squads(f) > 0);
   const sel = game.fleets.find(f => f.id === ui.selFleet && f.house === h && squads(f) > 0);
   const yards = game.systems.filter(s => canBuildAt(game, h, s.id));
   const bs = ui.sel != null && canBuildAt(game, h, ui.sel) ? ui.sel : null;
-  return `<div class="stepintro">You have <b>${ordersFor(game, h)} orders</b> this round. Moving a fleet one step or building ships at one of your systems uses one each. Gifts (step 3) and governing (step 4) use orders too.</div>
+  const sub = ui.fsub || 'move';
+  const moves = ui.orders.actions.filter(a => a.type === 'move').length, builds = ui.orders.actions.filter(a => a.type === 'build' && a.hulls.length).length;
+  const tabs = `<div class="substeps" role="group" aria-label="Fleet orders">${FSUB.map(([k, l]) => `<button data-fsub="${k}" aria-pressed="${sub === k}">${l}${k === 'move' && moves ? ` <span class="ok">${moves}</span>` : k === 'build' && builds ? ' <span class="ok">✓</span>' : ''}</button>`).join('')}</div>`;
+  let body = '';
+  if (sub === 'move') {
+    body = `<p class="muted">Moving a fleet one step along a lane uses <b>1 order</b>. Crossing a gate costs a fuel toll, paid to whoever holds the far side. Fleets that end the round with a rival fight it.</p>
+      ${mine.length ? mine.map(f => {
+        const mv = moveOrderFor(f.id), active = ui.mode === 'move' && ui.selFleet === f.id;
+        return `<div class="mvrow${active ? ' active' : ''}"><img alt="" src="${iconURL(h, topHull(f))}"><span><b>${esc(f.name)}</b> <small class="muted">at ${esc(sysAt(f.sys).name)} · ${squads(f)} squadrons</small><br><small>${mv ? `<span style="color:var(--gold)">Moving to ${esc(sysAt(mv.to).name)}</span>` : '<span class="muted">Holding position</span>'}</small></span>
+          <span class="row">${mv ? `<button class="btn small" data-mvfleet="${f.id}">Change</button><button class="btn small" data-unmove="${f.id}">Cancel</button>` : `<button class="btn small ${active ? '' : 'primary'}" data-mvfleet="${f.id}" ${ordersLeft() <= 0 ? 'disabled title="No orders left"' : ''}>${active ? 'Choosing…' : 'Move…'}</button>`}</span></div>
+          ${active ? destsHtml(f) : ''}`;
+      }).join('') : '<p class="muted">You have no fleets. Build some in part B.</p>'}`;
+  } else if (sub === 'build') {
+    body = `<p class="muted">Building at one of your systems uses <b>1 order</b> however many ships you add there. New squadrons appear when the round resolves.</p>
+      ${yards.length ? `<div class="row">${yards.map(s => `<button class="btn small${s.id === bs ? ' primary' : ''}" data-yard="${s.id}">${esc(s.name)}${buildOrderAt(s.id) ? ' ✓' : ''}</button>`).join('')}</div>` : '<p class="muted">You hold no system you can build at.</p>'}
+      ${bs != null ? buildHtml(bs) : yards.length ? '<p class="muted">Pick one of your systems to build there.</p>' : ''}`;
+  } else {
+    body = `<p class="muted">Formation, doctrine and retreat are <b>free</b> and apply to every battle the fleet fights. Try ideas in the Fleet Battle prototype.</p>
+      ${mine.length ? `<div class="fleets">${mine.map(f => `<button class="fleetbtn" data-fleet="${f.id}" aria-pressed="${!!sel && sel.id === f.id}"><img alt="" src="${iconURL(h, topHull(f))}"><span>${esc(f.name)} <small>at ${esc(sysAt(f.sys).name)}</small><br><small>${squads(f)} squadrons · ${DOCTRINES[f.doctrine].name}</small></span><small></small></button>`).join('')}</div>` : '<p class="muted">You have no fleets.</p>'}
+      ${sel ? fleetCard(sel) : mine.length ? '<p class="muted">Pick a fleet.</p>' : ''}`;
+  }
+  return `<div class="stepintro">You have <b>${ordersFor(game, h)} orders</b> this round: moving a fleet or building at a system uses one each (gifts and governing use them too). Work through the three parts below.</div>
     <div><h3>Your orders</h3>${ordersHtml()}</div>
-    <h3>Your fleets</h3>
-    ${mine.length ? `<div class="fleets">${mine.map(f => `<button class="fleetbtn" data-fleet="${f.id}" aria-pressed="${!!sel && sel.id === f.id}"><img alt="" src="${iconURL(h, topHull(f))}"><span>${esc(f.name)} <small>at ${esc(sysAt(f.sys).name)}</small><br><small>${squads(f)} squadrons · ${DOCTRINES[f.doctrine].name}</small></span><small>${moveOrderFor(f.id) ? '→ ' + esc(sysAt(moveOrderFor(f.id).to).name) : 'holding'}</small></button>`).join('')}</div>` : '<p class="muted">You have no fleets. Build some at one of your systems.</p>'}
-    ${sel ? fleetCard(sel) : mine.length ? '<p class="muted">Pick a fleet to move it or change its formation and doctrine.</p>' : ''}
-    <h3>Build ships</h3>
-    ${yards.length ? `<div class="row">${yards.map(s => `<button class="btn small${s.id === bs ? ' primary' : ''}" data-yard="${s.id}">${esc(s.name)}${buildOrderAt(s.id) ? ' ✓' : ''}</button>`).join('')}</div>` : '<p class="muted">You hold no system you can build at.</p>'}
-    ${bs != null ? buildHtml(bs) : yards.length ? '<p class="muted">Pick one of your systems to build there.</p>' : ''}`;
+    ${tabs}${body}`;
 }
 function diploHtml() {
   const h = human();
   const hs = houseKeys(game).filter(k => k !== h).sort((a, b) => game.houses[b].prestige - game.houses[a].prestige);
   const badge = k => { const tr = treatyBetween(game, h, k); return tr ? `<span class="tag pact" title="${esc(termsText(tr.a, tr.b, tr.terms))}">${ongoingClauses(tr.terms).map(c => CLAUSE_SHORT[c]).join(' · ')}</span>` : '<span class="muted">No treaty</span>'; };
-  return `<div class="stepintro">Press <b>Talk</b> to propose a treaty, answer an envoy or send a gift${{ varkas: ', or deliver an ultimatum', meridian: ', or offer a loan', nyx: ', or start a whisper campaign' }[h] || ''}. Talking is free; the Concord charges influence to seal a treaty, and a gift uses an order.</div>
+  const sent = ui.orders.proposals || [];
+  return `<div class="stepintro">Press <b>Talk</b> to draft a treaty, answer an envoy or send a gift${{ varkas: ', or deliver an ultimatum', meridian: ', or offer a loan', nyx: ', or start a whisper campaign' }[h] || ''}. Your envoys leave when you end the round, and their answers (yes, no or a counter-offer) arrive in the round report, just as they would from your friends. Envoys that have reached you can be answered now.</div>
+    ${sent.length || ui.orders.ultimatum ? `<div class="pending"><b>Envoys ready to leave when you end the round</b>${sent.map(pr => `<span>To ${hname(pr.to)}: ${esc(termsText(h, pr.to, pr.terms, true))}, ${pr.terms.rounds} rounds. <button class="btn small" data-unpropose="${pr.to}">Recall</button></span>`).join('')}${ui.orders.ultimatum ? `<span>Ultimatum to ${hname(ui.orders.ultimatum.to)}: cede ${esc(sysAt(ui.orders.ultimatum.sid).name)}. <button class="btn small" data-act="unultimatum">Recall</button></span>` : ''}<span class="muted">${sealFee(game, h)} influence is set aside for each proposal's seal fee, in case it is accepted.</span></div>` : ''}
     ${game.inbox.length ? `<div class="envoys"><b>Envoys are waiting for your answer</b><div class="row">${game.inbox.map(e => `<button class="btn small" data-talk="${e.from}">${swatch(e.from)} ${HOUSES[e.from].short}</button>`).join('')}</div><span class="muted">Unanswered envoys leave when the round ends, and their houses take it as a snub.</span></div>` : ''}
     <table><thead><tr><th>House</th><th style="text-align:left">Your treaty</th><th title="Honour out of 10: reputation abroad">Honour</th><th></th></tr></thead><tbody>
     ${hs.map(k => `<tr><td><span class="who">${swatch(k)}${HOUSES[k].short}${game.inbox.some(e => e.from === k) ? ' <span class="tag envoy">Envoy</span>' : ''}${game.houses[k].missed >= 2 ? ' <span class="tag away" title="A Concord steward runs this house">Steward</span>' : ''}${hasClaim(game, h, k) ? ' <span class="tag claim" title="You have a claim on this house: your people back a war against it">Claim</span>' : ''}</span></td>
@@ -3107,7 +3410,16 @@ function renderYou() {
     ${profileHtml(h)}
     <div class="objective" style="border-color:var(--line)"><h3>Honour: ${m.honour} of 10 (${honourLabel(m.honour)})</h3><div class="meter"><i style="width:${m.honour * 10}%;background:var(--good)"></i></div>
       <span class="muted">Your reputation with the other houses. Binding treaties of ${RULES.HONOUR.minRounds}+ rounds that run their full term: +1. Shortfalls: −1. Betrayal: −3. At the end, each point above 5 is worth +${RULES.HONOUR.endBonus} prestige (below 5 costs ${RULES.HONOUR.endBonus}). At ${RULES.HONOUR.lowFee} or less, treaties cost you 1 more influence to seal. At ${RULES.HONOUR.untrusted} or less, nobody will sign peace with you.</span></div>
+    ${incomeHtml()}
     <div class="objective"><h3>Secret objective (+${RULES.P.objective} prestige)</h3><span>${o.text}</span><div class="meter"><i style="width:${Math.min(100, 100 * o.prog / o.goal)}%"></i></div><span class="muted">${o.prog} of ${o.goal}</span></div>`;
+}
+function incomeHtml() {
+  const fc = incomeForecast(), rows = r => fc.parts.filter(x => x.res === r).map(x => `<tr><td>${esc(cap(x.why))}</td><td class="amt" style="color:${x.amt < 0 ? 'var(--bad)' : 'var(--fg)'}">${x.amt > 0 ? '+' : '−'}${Math.abs(x.amt)}</td></tr>`).join('');
+  const block = (r, label) => `<tr><th colspan="2" style="text-align:left">${label}: ${fc[r] >= 0 ? '+' : '−'}${Math.abs(fc[r])} a round</th></tr>${rows(r) || '<tr><td class="muted">Nothing</td><td></td></tr>'}`;
+  const fuelNote = fc.f <= 0 ? `<p class="muted">You hold no fuel worlds, so your fuel only grows from tolls other houses pay to cross your gates. Take a fuel world (blue), ask for fuel in a treaty, or spend it carefully: gate tolls and repairs use it.</p>` : '';
+  return `<div class="objective income" style="border-color:var(--line)"><h3>Income next round</h3>
+    <table><tbody>${block('c', 'Credits')}${block('f', 'Fuel')}${block('i', 'Influence')}</tbody></table>
+    <span class="muted">Paid when the round resolves, after this round's spending, if you hold the same systems: taking or losing a system changes it (a house with one system also gets the Concord stipend). Tolls other houses pay you are extra and vary. Taxes and mandate change it too (step 4).</span>${fuelNote}</div>`;
 }
 // ---------- At home: mandate, taxes, governing, claims ----------
 function homeHtml() {
@@ -3155,6 +3467,8 @@ function reviewHtml() {
   for (const tr of game.treaties) if (tr.start === game.round && (tr.a === h || tr.b === h)) dip.push(`Sealed this round with ${hname(tr.a === h ? tr.b : tr.a)}: ${esc(termsText(tr.a, tr.b, tr.terms))}`);
   for (const dd of o.diplo) dip.push(`<b style="color:${dd.type === 'betray' ? 'var(--bad)' : 'var(--gold)'}">${dd.type === 'betray' ? 'Betray' : 'Denounce'} your treaty with ${hname(dd.with)}</b>`);
   if (o.whisper) dip.push(`Whisper campaign in ${hname(o.whisper)} (${RULES.GAMBIT.whisper} influence)`);
+  for (const pr of o.proposals || []) dip.push(`Envoy to ${hname(pr.to)}: ${esc(termsText(h, pr.to, pr.terms, true))}, ${pr.terms.rounds} rounds (answer in the round report)`);
+  if (o.ultimatum) dip.push(`Ultimatum to ${hname(o.ultimatum.to)}: cede ${esc(sysAt(o.ultimatum.sid).name)} (${RULES.GAMBIT.ultimatum} influence)`);
   const tx = o.taxes || me().taxes || 'normal';
   const home = [`${cap(tx)} taxes`, ...o.actions.filter(a => a.type === 'govern').map(a => actionText(a) + ' (1 order)')];
   const warns = [];
@@ -3186,16 +3500,19 @@ function renderSteps() {
   }
   const notice = game.inbox.length && ui.step !== 'diplomacy' && ui.step !== 'review' ? `<div class="notice">Envoys are waiting for your answer in <button class="btn small" data-goto="diplomacy">3 · Diplomacy</button></div>` : '';
   const body = { council: () => `<div class="stepintro">The council votes on one decree each round, and a jump gate is failing. Decide your vote, any motion for next round, and how much fuel to send secretly.</div>${councilHtml()}`,
-    fleets: fleetsHtml, diplomacy: diploHtml, home: () => homeHtml() + `<details><summary>While you're away</summary>${awayHtml()}</details>`, review: reviewHtml }[ui.step];
+    fleets: fleetsHtml, diplomacy: diploHtml, home: homeHtml, review: reviewHtml }[ui.step];
   $('stepBody').innerHTML = notice + body();
   const prev = STEPS[i - 1], next = STEPS[i + 1];
-  $('stepNav').innerHTML = `${prev ? `<button class="btn" data-goto="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>'}
-    ${next ? `<button class="btn primary" data-goto="${next[0]}">Next: ${next[1]} ›</button>` : `<button class="btn primary" id="endTurn" ${bad ? 'disabled' : ''}>Confirm and end round ${game.round}</button>`}`;
+  const fi = FSUB.findIndex(s => s[0] === (ui.fsub || 'move'));
+  const back = ui.step === 'fleets' && fi > 0 ? `<button class="btn" data-fsub="${FSUB[fi - 1][0]}">‹ ${FSUB[fi - 1][1]}</button>` : prev ? `<button class="btn" data-goto="${prev[0]}">‹ ${prev[1]}</button>` : '<span></span>';
+  const fwd = ui.step === 'fleets' && fi < FSUB.length - 1 ? `<button class="btn primary" data-fsub="${FSUB[fi + 1][0]}">Next: ${FSUB[fi + 1][1]} ›</button>`
+    : next ? `<button class="btn primary" data-goto="${next[0]}">Next: ${next[1]} ›</button>` : `<button class="btn primary" id="endTurn" ${bad ? 'disabled' : ''}>Confirm and end round ${game.round}</button>`;
+  $('stepNav').innerHTML = back + fwd;
 }
 function renderHint() {
   let t = '';
   if (game.over) t = 'The game is over. Press New game to play again.';
-  else if (ui.mode === 'move') t = '<b>Move:</b> click a highlighted neighbouring system (green = you can afford the toll). Press Esc to cancel.';
+  else if (ui.mode === 'move') t = '<b>Move:</b> click a system ringed in green (red = you can\'t go or can\'t afford the toll), or pick from the list in step 2. Press Esc to cancel.';
   else t = '<b>Map:</b> click a system for details. Scroll or use + and − to zoom; drag to look around when zoomed in.';
   $('hint').innerHTML = t;
 }
@@ -3203,6 +3520,7 @@ function renderAll() {
   visCache = null;
   if (!game) return;
   renderStatus(); renderSteps(); renderSel(); renderBoard(); renderYou(); renderHint();
+  $('awayCard').innerHTML = awayHtml();
   if ($('diplo').open) renderDiplo();
   document.documentElement.style.setProperty('--accent', HOUSES[human()].pal.mid);
   document.documentElement.style.setProperty('--accent-light', HOUSES[human()].pal.light);
@@ -3212,7 +3530,7 @@ function renderAll() {
 function awayHtml() {
   const m = me(), so = m.standing || STANDING_DEFAULT, missed = m.missed || 0;
   const row = key => `<div class="row"><b>${STANDING[key].label}</b><div class="seg" role="group" aria-label="${STANDING[key].label}">${STANDING[key].opts.map(([v, l]) => `<button data-stand="${key}" data-v="${v}" aria-pressed="${so[key] === v}">${l}</button>`).join('')}</div></div><span class="muted">${STANDING[key].help[so[key]]}</span>`;
-  return `<p class="muted">Each round has a time window in the real game. Miss one and your standing orders apply: fleets hold, treaty payments continue, your gate repair goes out, and you vote with the majority. From the second missed round, a Concord steward runs your house with these settings. Stewards keep every treaty, never betray, table no motions and start no wars. At home they lower taxes when your people grow restless, and hold a festival or proclamation if things get worse.</p>
+  return `<p class="muted">Set these once; they apply whenever you miss a round, not to this turn. Each round has a time window in the real game. Miss one and your standing orders apply: fleets hold, treaty payments continue, your gate repair goes out, and you vote with the majority. From the second missed round, a Concord steward runs your house with these settings. Stewards keep every treaty, never betray, table no motions and start no wars. At home they lower taxes when your people grow restless, and hold a festival or proclamation if things get worse.</p>
     ${missed ? `<p class="muted" style="color:#b9a6ff">You have missed ${missed} round${missed > 1 ? 's' : ''}${missed >= 2 ? ', so a steward is in charge' : ''}. End this round to take charge again.</p>` : ''}
     <div class="standing">${['stance', 'build', 'repair', 'envoys'].map(row).join('')}</div>
     <div class="row"><span class="muted">Try it:</span><button class="btn small" data-away="1">Miss 1 round</button><button class="btn small" data-away="3">Away 3 rounds</button><button class="btn small" data-away="5">Away 5 rounds</button></div>
@@ -3297,7 +3615,7 @@ function renderDiplo() {
   const att = R.att, attLabel = att >= 4 ? 'Friendly' : att >= 1.5 ? 'Warm' : att > -1.5 ? 'Neutral' : att > -4 ? 'Cool' : 'Hostile';
   const queued = ui.orders.diplo.find(x => x.with === k);
   const d = ui.draft, terms = draftTerms(), valid = termsValid(game, h, k, terms);
-  const heard = R.heard === game.round;
+  const pend = (ui.orders.proposals || []).find(x => x.to === k);
   let html = `<div class="row between"><h2 id="h-diplo"><span class="row">${swatch(k)}${H_.name}</span></h2><button class="btn small" data-act="closeDiplo">Close</button></div>
     <div class="diplo-top"><span class="muted">${H_.tag}. ${PROFILE[k].style}</span>
     <details><summary>${H_.short}'s strengths and weakness</summary>${profileHtml(k)}</details>
@@ -3322,16 +3640,18 @@ function renderDiplo() {
       continue;
     }
     const v = termsValid(game, k, h, e.terms);
-    html += `<div class="box" style="border-color:var(--gold)"><h3>Envoy from ${H_.short}</h3><span>${esc(e.text)}</span><span class="muted">Terms: ${esc(termsText(k, h, e.terms, true))}, for ${e.terms.rounds} rounds. Seal fee: ${sealFee(game, h)} influence for you.</span>
+    html += `<div class="box" style="border-color:var(--gold)"><h3>${e.counter ? 'Counter-offer' : 'Envoy'} from ${H_.short}</h3><span>${esc(e.text)}</span><span class="muted">Terms: ${esc(termsText(k, h, e.terms, true))}, for ${e.terms.rounds} rounds. Seal fee: ${sealFee(game, h)} influence for you.</span>
       ${v.ok ? '' : `<span class="muted" style="color:var(--bad)">${esc(cap(v.why))}.</span>`}
-      <div class="row"><button class="btn small primary" data-envoy-yes="${e.id}" ${v.ok ? '' : 'disabled'}>Accept</button><button class="btn small" data-envoy-no="${e.id}">Decline</button></div></div>`;
+      <div class="row"><button class="btn small primary" data-envoy-yes="${e.id}" ${v.ok ? '' : 'disabled'}>Accept</button><button class="btn small" data-envoy-no="${e.id}">Decline</button></div>
+      <span class="muted">${e.counter ? 'This is their answer to your proposal. ' : ''}Accepting seals it now (in the real game, when the round resolves). To ask for something different, decline and send your own envoy.</span></div>`;
   }
   if (h === 'varkas') {
     const ut = ultimatumTargets(game, h, k), used = me().usedGambit === game.round;
     html += `<div class="box warn"><h3>Ultimatum (${RULES.GAMBIT.ultimatum} influence)</h3>
-      ${ut.length ? `<div class="row"><select id="ultSys" aria-label="System to demand">${ut.map(id => `<option value="${id}">${esc(sysAt(id).name)}</option>`).join('')}</select><button class="btn small" data-act="ultimatum" ${me().influence < RULES.GAMBIT.ultimatum || used ? 'disabled' : ''}>Deliver ultimatum</button></div>`
+      ${ui.orders.ultimatum ? `<div class="row"><b style="color:var(--gold)">Your ultimatum to ${hname(ui.orders.ultimatum.to)} (cede ${esc(sysAt(ui.orders.ultimatum.sid).name)}) goes out when the round ends.</b><button class="btn small" data-act="unultimatum">Recall</button></div>`
+        : ut.length ? `<div class="row"><select id="ultSys" aria-label="System to demand">${ut.map(id => `<option value="${id}">${esc(sysAt(id).name)}</option>`).join('')}</select><button class="btn small" data-act="ultimatum" ${used ? 'disabled' : ''}>Send ultimatum</button></div>`
         : `<span class="muted">${hasClause(game, h, k, 'nap') ? `You are at peace with ${H_.short}.` : `${H_.short} holds no system next to yours, other than its home.`}</span>`}
-      <span class="muted">Demand a system next to your territory. If ${H_.short} refuses, you gain a claim on it for ${RULES.CLAIM.attack} rounds and your people rally (+1 mandate). ${used ? 'You have already delivered an ultimatum this round.' : 'One ultimatum a round.'}</span></div>`;
+      <span class="muted">Demand a system next to your territory. It is delivered when the round ends and answered at once. If ${H_.short} refuses, you gain a claim on it for ${RULES.CLAIM.attack} rounds and your people rally (+1 mandate). ${used ? 'You have already delivered an ultimatum this round.' : 'One ultimatum a round.'}</span></div>`;
   }
   if (h === 'nyx') {
     const w = ui.orders.whisper;
@@ -3352,8 +3672,9 @@ function renderDiplo() {
     <div class="row"><b style="font-size:13px">Duration</b>${seg('rounds', RULES.DURATIONS.map(n => [n, n + ' rounds']), d.rounds)}</div>
     <span class="muted">${ongoingClauses(terms).length ? 'Offer: ' + esc(termsText(h, k, terms, true)) + ', for ' + terms.rounds + ' rounds. ' : ''}Seal fee: ${sealFee(game, h)} influence for you, ${sealFee(game, k)} for them. Up-front payments stay private; everything else is public.</span>
     ${!valid.ok && ongoingClauses(terms).length ? `<span class="muted" style="color:var(--bad)">${esc(cap(valid.why))}.</span>` : ''}
-    <div class="row"><button class="btn primary small" data-act="propose" ${valid.ok && !heard ? '' : 'disabled'}>Propose</button>${heard ? `<span class="muted">${H_.short} has heard your proposal this round.</span>` : ''}</div>
-    ${ui.reply ? `<div class="reply ${ui.reply.result === 'accepted' ? 'ok' : ui.reply.result === 'rejected' ? 'no' : ''}">${esc(ui.reply.text)}${ui.reply.result === 'countered' ? `<div class="row" style="margin-top:6px"><button class="btn small primary" data-act="counterOk">Accept their terms</button></div>` : ''}</div>` : ''}
+    ${pend ? `<div class="pending"><b>Your envoy will carry: ${esc(termsText(h, k, pend.terms, true))}, for ${pend.terms.rounds} rounds.</b><span class="muted">It leaves when you end the round. ${H_.short}'s answer (accept, decline or a counter-offer) will be in the round report. Proposing again replaces it.</span><div class="row"><button class="btn small" data-unpropose="${k}">Recall envoy</button></div></div>` : ''}
+    <div class="row"><button class="btn primary small" data-act="propose" ${valid.ok ? '' : 'disabled'}>${pend ? 'Replace envoy' : 'Send envoy'}</button><span class="muted">Answer arrives in the round report.</span></div>
+    ${ui.reply ? `<div class="reply ${ui.reply.result === 'accepted' ? 'ok' : ui.reply.result === 'rejected' ? 'no' : ''}">${esc(ui.reply.text)}</div>` : ''}
   </div>`;
   const gft = ui.gift;
   html += `<div class="box"><h3>Send a gift (1 order)</h3><div class="row"><select id="giftRes" aria-label="Gift resource">${['credits', 'fuel', 'influence'].map(r => `<option${gft.res === r ? ' selected' : ''}>${r}</option>`).join('')}</select>${stepper('gift', gft.amt)}
@@ -3411,14 +3732,7 @@ mapCv.addEventListener('click', e => {
   const s = nearestSys(toMap(e), pickR(12));
   if (ui.mode === 'move' && ui.selFleet) {
     const f = game.fleets.find(x => x.id === ui.selFleet);
-    if (s && f && neighbours(game, f.sys).includes(s.id)) {
-      const mv = canMove(game, f, s.id);
-      if (mv.ok) {
-        const old = moveOrderFor(f.id);
-        if (old) old.to = s.id; else if (ordersLeft() > 0) ui.orders.actions.push({ type: 'move', fleet: f.id, to: s.id });
-        ui.mode = null; save(); renderAll(); return;
-      }
-    }
+    if (s && f && neighbours(game, f.sys).includes(s.id)) { setMove(f, s.id); renderAll(); return; }
     ui.mode = null;
   }
   ui.sel = s ? s.id : null; ui.pick = null;
@@ -3434,11 +3748,12 @@ document.addEventListener('click', e => {
   const d = t.dataset;
   if (d.step) {
     const delta = +d.d, p = proj();
-    if (d.step === 'repair') { if (delta > 0 && p.f <= 0) return; ui.orders.repair = Math.max(0, ui.orders.repair + delta); }
-    if (d.step === 'inf') { if (delta > 0 && p.i <= 0) return; ui.orders.vote.inf = Math.max(0, ui.orders.vote.inf + delta); }
-    if (d.step === 'cr') { if (delta > 0 && p.c < 2) return; ui.orders.vote.cr = Math.max(0, ui.orders.vote.cr + delta * 2); }
-    if (d.step === 'gift') { const have = { credits: p.c, fuel: p.f, influence: p.i }[ui.gift.res]; ui.gift.amt = Math.max(0, Math.min(have, ui.gift.amt + delta)); }
-    if (d.step === 'motion' && ui.orders.motion) { if (delta > 0 && p.i <= 0) return; ui.orders.motion.inf = Math.max(1, ui.orders.motion.inf + delta); }
+    if (d.step === 'repair') { if (delta > 0 && !affordable({ f: 1 }, 'send more fuel to the gate')) return; ui.orders.repair = Math.max(0, ui.orders.repair + delta); }
+    if (d.step === 'inf') { if (delta > 0 && !affordable({ i: 1 }, 'buy another vote')) return; ui.orders.vote.inf = Math.max(0, ui.orders.vote.inf + delta); }
+    if (d.step === 'cr') { if (delta > 0 && !affordable({ c: 2 }, 'buy another vote')) return; ui.orders.vote.cr = Math.max(0, ui.orders.vote.cr + delta * 2); }
+    if (d.step === 'gift') { const have = { credits: p.c, fuel: p.f, influence: p.i }[ui.gift.res]; if (delta > 0 && ui.gift.amt + 1 > have) { toast(`You only have ${Math.max(0, have)} ${ui.gift.res} to give after this round's other plans.`); return; } ui.gift.amt = Math.max(0, Math.min(have, ui.gift.amt + delta)); }
+    if (d.step === 'motion' && ui.orders.motion) { if (delta > 0 && !affordable({ i: 1 }, 'back the motion with more influence')) return; ui.orders.motion.inf = Math.max(1, ui.orders.motion.inf + delta); }
+    Sfx.play('click');
     if (d.step === 'compact') { ui.draft.compact = Math.max(0, Math.min(RULES.MAX.compact, ui.draft.compact + delta)); ui.reply = null; }
     if (d.step === 'tribAmt') { ui.draft.tribAmt = Math.max(1, Math.min(RULES.MAX.tribute, ui.draft.tribAmt + delta)); ui.reply = null; }
     if (d.step === 'giftAmt') { ui.draft.giftAmt = Math.max(1, Math.min(RULES.MAX.gift, ui.draft.giftAmt + delta)); ui.reply = null; }
@@ -3450,17 +3765,23 @@ document.addEventListener('click', e => {
   if (d.away) { goAway(+d.away); return; }
   if (d.dseg) { ui.draft[d.dseg] = d.dseg === 'rounds' || d.dseg === 'loan' ? +d.v : d.v; ui.reply = null; renderDiplo(); return; }
   if (d.tax) { ui.orders.taxes = d.tax; save(); renderAll(); return; }
-  if (d.govern) { if (ordersLeft() > 0 && !ui.orders.actions.some(a => a.type === 'govern')) ui.orders.actions.push({ type: 'govern', kind: d.govern }); save(); renderAll(); return; }
+  if (d.govern) { Sfx.play('place'); if (ordersLeft() > 0 && !ui.orders.actions.some(a => a.type === 'govern')) ui.orders.actions.push({ type: 'govern', kind: d.govern }); save(); renderAll(); return; }
   if (d.act === 'ungovern') { ui.orders.actions = ui.orders.actions.filter(a => a.type !== 'govern'); save(); renderAll(); return; }
   if (d.act === 'whisper') { ui.orders.whisper = ui.talk; save(); renderAll(); return; }
   if (d.act === 'unwhisper') { ui.orders.whisper = null; save(); renderAll(); return; }
   if (d.act === 'ultimatum') {
     const sid = +$('ultSys').value, k = ui.talk;
-    if (!ultimatumTargets(game, human(), k).includes(sid) || me().usedGambit === game.round || me().influence < RULES.GAMBIT.ultimatum) return;
-    const yes = deliverUltimatum(game, human(), k, sid, turnLog(game));
-    ui.reply = yes ? { result: 'accepted', text: hname(k) + ' bows to your ultimatum and cedes ' + sysAt(sid).name + '. It is yours now.' }
-      : { result: 'rejected', text: hname(k) + ' refuses. You now have a claim on ' + hname(k) + ' for ' + RULES.CLAIM.attack + ' rounds, and your people rally (+1 mandate when the round resolves).' };
-    visCache = null; save(); renderAll(); return;
+    if (!ultimatumTargets(game, human(), k).includes(sid) || me().usedGambit === game.round) return;
+    if (!affordable({ i: RULES.GAMBIT.ultimatum }, 'send an ultimatum')) return;
+    ui.orders.ultimatum = { to: k, sid }; Sfx.play('place');
+    save(); renderAll(); return;
+  }
+  if (d.act === 'unultimatum') { ui.orders.ultimatum = null; save(); renderAll(); return; }
+  if (d.unpropose) { ui.orders.proposals = (ui.orders.proposals || []).filter(x => x.to !== d.unpropose); save(); renderAll(); return; }
+  if (d.envoyYes) {
+    const e = game.inbox.find(x => x.id === +d.envoyYes), gf = e && e.terms && e.terms.gift;
+    const cost = { i: e && e.terms ? sealFee(game, human()) + (gf && gf.from === human() && gf.res === 'influence' ? gf.amt : 0) : 0, c: gf && gf.from === human() && gf.res === 'credits' ? gf.amt : 0, f: gf && gf.from === human() && gf.res === 'fuel' ? gf.amt : 0 };
+    if (e && e.terms && !affordable(cost, 'seal this treaty')) return;
   }
   if (d.envoyYes || d.envoyNo) {
     const res = answerEnvoy(game, +(d.envoyYes || d.envoyNo), !!d.envoyYes);
@@ -3468,14 +3789,14 @@ document.addEventListener('click', e => {
     visCache = null; save(); renderAll(); return;
   }
   if (d.act === 'propose') {
-    const res = proposeTreaty(game, human(), ui.talk, draftTerms());
-    ui.reply = res; if (res.result === 'accepted') ui.draft = blankDraft();
-    visCache = null; save(); renderAll(); return;
-  }
-  if (d.act === 'counterOk') {
-    const res = acceptCounter(game, human(), ui.talk);
-    ui.reply = { result: res.ok ? 'accepted' : 'rejected', text: res.text }; if (res.ok) ui.draft = blankDraft();
-    visCache = null; save(); renderAll(); return;
+    const terms = draftTerms(), others = (ui.orders.proposals || []).filter(x => x.to !== ui.talk), had = (ui.orders.proposals || []).find(x => x.to === ui.talk);
+    ui.orders.proposals = others;   // check affordability without the envoy this one replaces
+    const gf = terms.gift && terms.gift.from === human() ? terms.gift : null;
+    const cost = { i: sealFee(game, human()) + (gf && gf.res === 'influence' ? gf.amt : 0), c: gf && gf.res === 'credits' ? gf.amt : 0, f: gf && gf.res === 'fuel' ? gf.amt : 0 };
+    if (!affordable(cost, 'send this envoy (the seal fee is set aside in case they accept)')) { ui.orders.proposals = had ? [...others, had] : others; return; }
+    ui.orders.proposals = [...others, { to: ui.talk, terms }];
+    ui.reply = null; Sfx.play('place');
+    save(); renderAll(); return;
   }
   if (d.act === 'denounce') { ui.orders.diplo = ui.orders.diplo.filter(x => x.with !== ui.talk); ui.orders.diplo.push({ type: 'denounce', with: ui.talk }); save(); renderAll(); return; }
   if (d.act === 'betray') { ui.confirmBetray = true; renderDiplo(); return; }
@@ -3483,9 +3804,13 @@ document.addEventListener('click', e => {
   if (d.act === 'betrayConfirm') { ui.confirmBetray = false; ui.orders.diplo = ui.orders.diplo.filter(x => x.with !== ui.talk); ui.orders.diplo.push({ type: 'betray', with: ui.talk }); save(); renderAll(); return; }
   if (d.act === 'undiplo') { ui.orders.diplo = ui.orders.diplo.filter(x => x.with !== ui.talk); save(); renderAll(); return; }
   if (d.act === 'closeDiplo') { $('diplo').close(); return; }
-  if (d.fleet) { ui.selFleet = +d.fleet; const f = game.fleets.find(x => x.id === ui.selFleet); if (f) { ui.sel = f.sys; centreOn(f.sys); } ui.pick = null; ui.mode = null; ui.step = 'fleets'; renderAll(); return; }
-  if (d.yard) { ui.sel = +d.yard; centreOn(ui.sel); ui.mode = null; ui.step = 'fleets'; renderAll(); return; }
-  if (d.goto) { ui.step = d.goto; ui.mode = null; renderAll(); const top = $('h-turn'); if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: 'start' }); return; }
+  if (d.fleet) { ui.selFleet = +d.fleet; const f = game.fleets.find(x => x.id === ui.selFleet); if (f) { ui.sel = f.sys; centreOn(f.sys); } ui.pick = null; ui.mode = null; ui.step = 'fleets'; if (!t.closest('#stepBody')) ui.fsub = 'move'; Sfx.play('select'); renderAll(); return; }
+  if (d.yard) { ui.sel = +d.yard; centreOn(ui.sel); ui.mode = null; ui.step = 'fleets'; ui.fsub = 'build'; Sfx.play('select'); renderAll(); return; }
+  if (d.mvfleet) { const f = game.fleets.find(x => x.id === +d.mvfleet); if (!f) return; if (!moveOrderFor(f.id) && ordersLeft() <= 0) { toast('No orders left. Remove an order (✕ in the list) to free one.'); return; } const again = ui.mode === 'move' && ui.selFleet === f.id; ui.selFleet = f.id; ui.sel = f.sys; centreOn(f.sys); ui.mode = again ? null : 'move'; Sfx.play('select'); renderAll(); return; }
+  if (d.moveto) { const f = game.fleets.find(x => x.id === ui.selFleet); if (f && setMove(f, +d.moveto)) renderAll(); return; }
+  if (d.unmove) { ui.orders.actions = ui.orders.actions.filter(a => !(a.type === 'move' && a.fleet === +d.unmove)); ui.mode = null; save(); renderAll(); return; }
+  if (d.fsub) { ui.fsub = d.fsub; ui.mode = null; Sfx.play('step'); renderAll(); return; }
+  if (d.goto) { if (d.goto !== ui.step) Sfx.play('step'); if (d.goto === 'fleets' && ui.step !== 'fleets') ui.fsub = ui.step === 'diplomacy' && t.closest('#stepNav') ? 'formation' : 'move'; ui.step = d.goto; ui.mode = null; renderAll(); const top = $('h-turn'); if (top && top.getBoundingClientRect().top < 0) top.scrollIntoView({ block: 'start' }); return; }
   if (d.zoom) {
     const c = ui.sel != null ? sysAt(ui.sel) : { x: view.x + W / view.z / 2, y: view.y + H / view.z / 2 };
     if (d.zoom === 'fit') zoomAt(1, W / 2, H / 2);
@@ -3501,25 +3826,32 @@ document.addEventListener('click', e => {
   }
   if (d.build) {
     let bo = buildOrderAt(ui.sel);
-    if (!bo) { if (ordersLeft() <= 0) return; bo = { type: 'build', sys: ui.sel, hulls: [] }; ui.orders.actions.push(bo); }
-    if (buildCost(human(), [...bo.hulls, d.build]) - buildCost(human(), bo.hulls) <= proj().c) bo.hulls.push(d.build);
+    const extra = buildCost(human(), [...(bo ? bo.hulls : []), d.build]) - buildCost(human(), bo ? bo.hulls : []);
+    if (!bo && ordersLeft() <= 0) { toast('No orders left. Remove an order (✕ in the list) to free one.'); return; }
+    if (!affordable({ c: extra }, 'build a ' + HULLS[d.build].name)) return;
+    if (!bo) { bo = { type: 'build', sys: ui.sel, hulls: [] }; ui.orders.actions.push(bo); }
+    bo.hulls.push(d.build); Sfx.play('place');
     save(); renderAll(); return;
   }
   if (d.rm) { ui.orders.actions.splice(+d.rm, 1); save(); renderAll(); return; }
   if (d.act === 'move') { ui.mode = ui.mode === 'move' ? null : 'move'; renderAll(); return; }
   if (d.act === 'unmove') { ui.orders.actions = ui.orders.actions.filter(a => !(a.type === 'move' && a.fleet === ui.selFleet)); save(); renderAll(); return; }
   if (d.act === 'unbuild') { ui.orders.actions = ui.orders.actions.filter(a => !(a.type === 'build' && a.sys === ui.sel)); save(); renderAll(); return; }
-  if (d.act === 'giftok') { if (ordersLeft() > 0 && ui.gift.amt > 0) ui.orders.actions.push({ type: 'send', to: ui.gift.to, res: ui.gift.res, amt: ui.gift.amt }); ui.gift = { to: ui.gift.to, res: ui.gift.res, amt: 0 }; save(); renderAll(); return; }
-  if (t.id === 'endTurn') { endTurn(); return; }
+  if (d.act === 'giftok') { if (ordersLeft() <= 0) { toast('No orders left for a gift. Remove an order to free one.'); return; } if (ui.gift.amt > 0) Sfx.play('place'); if (ordersLeft() > 0 && ui.gift.amt > 0) ui.orders.actions.push({ type: 'send', to: ui.gift.to, res: ui.gift.res, amt: ui.gift.amt }); ui.gift = { to: ui.gift.to, res: ui.gift.res, amt: 0 }; save(); renderAll(); return; }
+  if (t.id === 'endTurn') { const p = proj(); if (p.c < 0 || p.f < 0 || p.i < 0) { toast('Your plans cost more than you have. Change something first.'); return; } Sfx.play('confirm'); endTurn(); return; }
 });
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'giftRes') { ui.gift.res = t.value; ui.gift.amt = 0; renderAll(); return; }
   if (t.dataset.dchk) { ui.draft[t.dataset.dchk] = t.checked; ui.reply = null; renderDiplo(); return; }
   if (t.dataset.dsel) { ui.draft[t.dataset.dsel] = t.value; ui.reply = null; renderDiplo(); return; }
-  if (t.dataset.writ) { ui.orders.writ = t.value === '' ? null : +t.value; save(); renderAll(); return; }
+  if (t.dataset.writ) {
+    if (t.value !== '' && ui.orders.writ == null && !affordable({ i: RULES.GAMBIT.writ }, "seal a gate with the Gatewarden's Writ")) { t.value = ''; return; }
+    ui.orders.writ = t.value === '' ? null : +t.value; save(); renderAll(); return;
+  }
   if (t.dataset.msel === 'type') {
     if (!t.value) ui.orders.motion = null;
+    else if (!ui.orders.motion && !affordable({ i: 1 }, 'table a motion (it needs at least 1 influence behind it)')) { t.value = ''; return; }
     else {
       const target = AIMED.includes(t.value) ? houseKeys(game).filter(k => k !== human())[0] : t.value === 'ceasefire' ? 0 : null;
       ui.orders.motion = { type: t.value, target, inf: ui.orders.motion ? ui.orders.motion.inf : 1 };
@@ -3543,7 +3875,8 @@ function endTurn() {
   const ord = JSON.parse(JSON.stringify(ui.orders));
   ord.actions = ord.actions.filter(a => a.type !== 'build' || a.hulls.length);
   const last = resolveRound(game, ord);
-  ui.orders = blankOrders(); ui.mode = null; ui.pick = null; ui.gift = null; ui.reply = null; ui.confirmBetray = false; ui.step = 'council'; ui.seen = new Set();
+  Sfx.play('endRound');
+  ui.orders = blankOrders(); ui.mode = null; ui.pick = null; ui.gift = null; ui.reply = null; ui.confirmBetray = false; ui.step = 'council'; ui.seen = new Set(); ui.fsub = 'move';
   if ($('diplo').open) $('diplo').close();
   visCache = null;
   const postVis = visibleSet(game, human());
@@ -3579,6 +3912,8 @@ function playBattle(i, auto) {
   startReplay(r, $('replayCv'), B => {
     if (tok !== replayToken) return;
     $('replayLbl').textContent += B.winner === r.winner ? ' · ' + battleResult(r) : ' · replay differs from the result';
+    fx.sound = null;
+    const res = battleResult(r); Sfx.play(res === 'Victory' ? 'victory' : res === 'Defeat' ? 'defeat' : 'stalemate');
     if (auto && pos < q.length - 1) setTimeout(() => { if (tok === replayToken && $('report').open) playBattle(q[pos + 1], true); }, 1500);
   });
 }
@@ -3630,7 +3965,9 @@ function showReport(last, seen) {
   if (reps.length) html += battlesHtml(reps);
   if (homeEv.length || inc) html += `<div class="homebox"><h3>At home</h3>${homeEv.map(e => `<span>${esc(e.text)}</span>`).join('')}
     ${inc ? `<span class="muted">Income: +${inc.c} credits${inc.trade ? ` (${inc.trade} from trade)` : ''}${inc.tax ? ` (${inc.tax > 0 ? '+' : '−'}${Math.abs(inc.tax)} from taxes)` : ''}, +${inc.f} fuel, +${inc.i} influence. Holdings: +${inc.held * RULES.P.system} prestige for ${inc.held} systems${inc.restless ? `, ${inc.restless} of them restless and paying nothing yet` : ''}.</span>` : ''}</div>`;
-  const rest = evs.filter(e => !homeEv.includes(e));
+  const replies = evs.filter(e => e.kind === 'reply');
+  if (replies.length) html += `<div class="homebox" style="border-color:var(--gold)"><h3>Replies to your envoys</h3>${replies.map(e => `<span>${esc(e.text)}</span>`).join('')}</div>`;
+  const rest = evs.filter(e => !homeEv.includes(e) && e.kind !== 'reply');
   if (rest.length) html += `<h3>What happened</h3><ul class="events">${rest.map(e => `<li class="${e.kind}">${esc(e.text)}</li>`).join('')}</ul>`;
   html += endHtml();
   $('reportBody').innerHTML = html;
@@ -3640,6 +3977,7 @@ function showReport(last, seen) {
   showReport.queue = reps.map((r, i) => i).sort((a, b) => (reps[b].a.house === me_ || reps[b].b.house === me_) - (reps[a].a.house === me_ || reps[a].b.house === me_));
   $('report').showModal();
   $('reportBody').scrollTop = 0;
+  if (game.inbox.length && !reps.length) setTimeout(() => Sfx.play('envoy'), 900);
   if (reps.length) playBattle(showReport.queue[0], true);
 }
 $('report').addEventListener('click', e => {
@@ -3653,6 +3991,7 @@ $('report').addEventListener('click', e => {
 });
 $('report').addEventListener('close', () => { replayToken++; stopReplay(); });
 
+mountSfxControl($('sfxCtl'));
 // ---------- Setup ----------
 const setup = { house: 'varkas', n: 7, rounds: 20 };
 function openSetup() {
@@ -3679,7 +4018,7 @@ $('setup').addEventListener('click', e => {
 });
 $('setup').addEventListener('cancel', e => { if (!game) e.preventDefault(); });
 function begin(g, orders, fresh) {
-  game = g; ui.orders = orders; ui.sel = game.houses[game.human].home; ui.mode = null; ui.pick = null; ui.gift = null; ui.anim = null; ui.step = 'council'; ui.seen = new Set(); clusterLabels = null;
+  game = g; ui.orders = Object.assign(blankOrders(), orders || {}); ui.sel = game.houses[game.human].home; ui.mode = null; ui.pick = null; ui.gift = null; ui.anim = null; ui.step = 'council'; ui.seen = new Set(); clusterLabels = null;
   const own = game.fleets.find(f => f.house === game.human && f.sys === ui.sel);
   ui.selFleet = own ? own.id : null;
   mapBg = paintBackground(game.seed % 1000, 120, true);
